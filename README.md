@@ -10,3 +10,9 @@ such events.
 * PyCharm
 * Python 3.9
 * Google Cloud SDK
+
+### Installing Google Cloud SDK
+I followed [this article](https://medium.com/swlh/installing-google-cloud-sdk-to-use-python-from-anaconda-94890014e4e8)
+to install Google Cloud SDK for use with Miniconda's python. 
+Since I used PyCharm for this project, I had to close and reopen 
+PyCharm to fix the issue described in step 4.

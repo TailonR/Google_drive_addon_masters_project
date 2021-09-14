@@ -180,4 +180,6 @@ I also determined that what I want to create is a Google Drive plugin.
 I searched for how to create a Google Drive plugin and found [this article](https://developers.google.com/workspace/add-ons/how-tos/building-gsuite-addons). 
 
 Other articles found when researching:
- * https://developers.google.com/workspace/add-ons/guides/gsuite-style
+ * Google's tips for UX design: https://developers.google.com/workspace/add-ons/guides/gsuite-style
+ * Installing Google Cloud SDK for use with Miniconda's python: https://medium.com/swlh/installing-google-cloud-sdk-to-use-python-from-anaconda-94890014e4e8
+   * Learned that I had to restart PyCharm to fix the issue described in step 4
