@@ -185,3 +185,10 @@ Other articles found when researching:
  * Installing Google Cloud SDK for use with Miniconda's python: https://medium.com/swlh/installing-google-cloud-sdk-to-use-python-from-anaconda-94890014e4e8
    * Learned that I had to restart PyCharm to fix the issue described in step 4
  * Google Cloud SDK Quickstart: https://cloud.google.com/sdk/docs/quickstart
+
+Chappell informed me that I would need to develop a file that would edit a 
+config.json file if I wanted to create a GUI for this app. This config.json 
+file is the file that contains who needs to be notified, what files need to 
+be monitored, and what service they want the message to be sent to. So I will
+start off with just having a predefined config file and then possibly 
+incorporate a GUI if I have time. 
