@@ -34,7 +34,7 @@ creating a “plugin” for Zetta for filling out data for configuring
 files. 
 
 ### August 26, 2021 
-I first looked [this article](https://www.thepodcasthost.com/planning/automation-systems-set-you-free/) 
+I first looked at a [The Podcast Host article](https://www.thepodcasthost.com/planning/automation-systems-set-you-free/) 
 for how to automate the podcast workflow. However, I kept thinking 
 about the fact that this is all too simple, not easy necessarily, 
 but simple. The problem with the idea is that it is around creating 
@@ -42,7 +42,7 @@ something that is not technically complex, which at the least, is
 what a Master’s project and thesis is supposed to focus on. 
 
 While thinking about this I came across the topic of automation 
-using AI. I first discovered an [IBM article](https://www.ibm.com/cloud/automation) 
+using AI. I first discovered an [IBM article on automation](https://www.ibm.com/cloud/automation) 
 which displayed the ways they used AI in automation. I then 
 discovered this article which discusses trends in the use of AI. 
 
@@ -104,7 +104,7 @@ The application for JavaScript applications (such as the Quickstart) was
 the “web application” option. When I created a new Oauth key then the 
 application worked (displaying a list of names of some files).
 
-Then I started learning about the authorization process. I followed [the docs](https://developers.google.com/drive/api/v3/about-auth) 
+Then I started learning about the authorization process. I followed [the authorization docs](https://developers.google.com/drive/api/v3/about-auth) 
 for this.
 
 > Your application must use [OAuth 2.0](https://developers.google.com/identity/protocols/OAuth2) 
@@ -124,8 +124,8 @@ Language Generation (NLG).
 > language generation (NLG) to add useful context and conclusions to summaries. 
 > – IMB article on NLP.
 
-I then found [an article](https://medium.datadriveninvestor.com/simple-text-summarizer-using-nlp-d8aaf5828e68) 
-talking about creating a text summarizer using Python. 
+I then found [a Medium article](https://medium.datadriveninvestor.com/simple-text-summarizer-using-nlp-d8aaf5828e68) 
+talking about creating a text summarizer using Python's NLP toolkit. 
 
 ### September 2, 2021
 I started writing my talk #0 paper.
@@ -177,9 +177,11 @@ the App Engine Dashboard.
 I also determined that what I want to create is a Google Drive plugin. 
 
 ### September 14, 2021
-I searched for how to create a Google Drive plugin and found [this article](https://developers.google.com/workspace/add-ons/how-tos/building-gsuite-addons). 
+I searched for how to create a Google Drive plugin and found [this Google article](https://developers.google.com/workspace/add-ons/how-tos/building-gsuite-addons)
+on building gsuite addons. 
 
 Other articles found when researching:
  * Google's tips for UX design: https://developers.google.com/workspace/add-ons/guides/gsuite-style
  * Installing Google Cloud SDK for use with Miniconda's python: https://medium.com/swlh/installing-google-cloud-sdk-to-use-python-from-anaconda-94890014e4e8
    * Learned that I had to restart PyCharm to fix the issue described in step 4
+ * Google Cloud SDK Quickstart: https://cloud.google.com/sdk/docs/quickstart
