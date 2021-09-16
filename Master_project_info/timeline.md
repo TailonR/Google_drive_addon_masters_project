@@ -192,3 +192,10 @@ file is the file that contains who needs to be notified, what files need to
 be monitored, and what service they want the message to be sent to. So I will
 start off with just having a predefined config file and then possibly 
 incorporate a GUI if I have time. 
+
+### September 16, 2021 
+Started working on how to push code to Google, since I don't want to use the 
+Cloud Shell Editor, which might just be what I have to do in the end. [This article ](https://cloud.google.com/source-repositories/docs/pushing-code-from-a-repository)
+discusses pushing to Cloud Source Repositories. I was able to simply connect to 
+the GitHub repository rather than recreating the repository in Cloud Source 
+Repositories.
