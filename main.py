@@ -1,16 +1,44 @@
-# This is a sample Python script.
+import json
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+#
+#  Google Cloud Function that loads the homepage for a
+#  Google Workspace Add-on.
+#
+#  @param {Object} req Request sent from Google
+#
+def load_homepage(req):
+    return create_action()
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+# Creates a card with two widgets.
+def create_action():
+    cards = {
+        "action": {
+            "navigations": [
+                {
+                    "pushCard": {
+                        "header": {
+                            "title": "Cats!"
+                        },
+                        "sections": [
+                            {
+                                "widgets": [
+                                    {
+                                        "textParagraph": {
+                                            "text": "Your random cat:"
+                                        }
+                                    },
+                                    {
+                                        "image": {
+                                            "imageUrl": "https://cataas.com/cat"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+    return json.dumps(cards)

@@ -1,4 +1,7 @@
-# Master Project Timeline
+# Master Project Timeline  
+**Date: August 24th 2021**  
+**Author: Tailon Russell**
+
 This is the timeline for the development of the Master project from 
 the creation of the idea through the development of the project.
 
@@ -193,9 +196,46 @@ be monitored, and what service they want the message to be sent to. So I will
 start off with just having a predefined config file and then possibly 
 incorporate a GUI if I have time. 
 
+Links I found today:
+* https://bulldogjob.com/news/449-how-to-write-a-good-readme-for-your-github-project
+* https://www.figma.com/file/6H3A68mSgD4pJa44v5i5Vb/G-Suite-Add-Ons-UI-Design-Kit-(Community)?node-id=84%3A3202
+* https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+* https://cloud.google.com/sdk/auth_success
+
 ### September 16, 2021 
 Started working on how to push code to Google, since I don't want to use the 
 Cloud Shell Editor, which might just be what I have to do in the end. [This article ](https://cloud.google.com/source-repositories/docs/pushing-code-from-a-repository)
 discusses pushing to Cloud Source Repositories. I was able to simply connect to 
 the GitHub repository rather than recreating the repository in Cloud Source 
-Repositories.
+Repositories (after finding [this article](https://cloud.google.com/source-repositories/docs/creating-an-empty-repository)).
+
+I also installed Code Build in this repository. I did this in order to set 
+up Cloud Run.
+
+I kept getting an error saying there was a missing "res" argument. Then I found 
+[an article](https://cloud.google.com/functions/docs/writing/http#writing_http_helloworld-python) about HTTP functions 
+
+Links found today:
+* https://developers.google.com/workspace/add-ons/concepts/homepages
+* https://developers.google.com/workspace/add-ons/drive/building-drive-interfaces
+* https://developers.google.com/workspace/add-ons/concepts/gsuite-manifests
+* https://developers.google.com/workspace/add-ons/reference/rpc/google.apps.card.v1
+* https://developers.google.com/workspace/add-ons/guides/alternate-runtimes
+* https://developers.google.com/workspace/add-ons/alternate-runtimes-quickstart
+* https://developers.google.com/workspace/add-ons/teams-addon-sample
+* https://cloud.google.com/functions/docs/deploying/
+* https://github.com/GoogleCloudPlatform/functions-framework-python
+
+### September 18, 2021
+I got the Quickstart on alternate runtimes working. I was trying to move 
+all of the stuff in the common section for the drive interface but there
+are properties in the common section that are not in the drive, which is 
+why it was failing. The page that talks about the properties is [here](https://developers.google.com/apps-script/manifest/addons).
+
+Started creating a methodology page so that step can be easily recreated.
+
+I found [this article ](https://cloud.google.com/iam/docs/granting-changing-revoking-access) 
+in reference to service roles.
+
+### September 21, 2021
+Continued adding to the methodology page, finished at step 30. 
