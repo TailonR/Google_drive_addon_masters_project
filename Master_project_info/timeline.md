@@ -15,17 +15,18 @@ content management and deleting old files. Another option
 discussed was working with KSUA in automating the process of 
 uploading audio to KSUA and playing it in automation. 
 
-### August 25, 2021 Discussed with Kevin Swenson about working with
-KSUA on automating the automation process (uploading audio and 
-loading it into zetta). Turns out there is quite a bit of automation 
-already. When audio is uploaded to the Recently Uploaded, that audio 
-is downloaded into a folder of the same name. Then Gselector looks at 
-that file’s metadata and compares it with other files that were 
-previously loaded that are associated with the volunteer’s show 
-(these are called links). If the metadata is new and it is the most 
-recent file in the recently uploaded, then it is uploaded to zetta. 
-The only human input is scheduling the show for the right time. This 
-is more of a sanity check so that there weren’t any mistakes made. 
+### August 25, 2021 
+Discussed with Kevin Swenson about working with KSUA on automating 
+the automation process (uploading audio and loading it into zetta). 
+Turns out there is quite a bit of automation already. When audio is 
+uploaded to the Recently Uploaded, that audio is downloaded into a 
+folder of the same name. Then Gselector looks at that file’s 
+metadata and compares it with other files that were previously 
+loaded that are associated with the volunteer’s show (these are 
+called links). If the metadata is new and it is the most recent 
+file in the recently uploaded, then it is uploaded to zetta. The 
+only human input is scheduling the show for the right time. This is 
+more of a sanity check so that there weren’t any mistakes made. 
 
 Kevin S. also noted that other projects that could be useful to KSUA 
 is automatically recording shows. The parameters are to start 
@@ -239,3 +240,30 @@ in reference to service roles.
 
 ### September 21, 2021
 Continued adding to the methodology page, finished at step 30. 
+
+Found out that in order to run methods of a service I have to end it with calling 
+"execute."
+
+I also found [this article](https://stackoverflow.com/questions/46668084/how-do-i-properly-base64-encode-a-mimetext-for-gmail-api#46668827) 
+for actually being able to save message as string, rather than bytes.
+
+### September 23, 2021
+I fixed an issue that I had where I couldn't send an email with the recipient
+being my person email. The reason being there was an extra @-symbol.
+
+### September 24, 2021
+I created the whatToDo.md file to keep track of what I want the app to do.
+
+I also learned that App Engine provides a 5GB default storage. The info
+for that can be found [here](https://cloud.google.com/appengine/docs/standard/python3/using-cloud-storage).
+
+I have learned that I did not set up my app engine application and therefore
+I may need to add new steps to my project.
+
+### October 5, 2021
+For the past week I was working on a way to store tokens. I figured it out by
+using Google Datastore. However I am not sure if this is best way to do so, 
+becasue the token is stored in plain text. 
+
+As of now, I am able to click on an item in the Google Drive and an email is 
+sent. 

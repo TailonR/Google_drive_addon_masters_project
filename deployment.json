@@ -1,22 +1,19 @@
 {
   "oauthScopes": ["https://www.googleapis.com/auth/drive.addons.metadata.readonly",
     "https://www.googleapis.com/auth/drive.readonly",
-    "https://www.googleapis.com/auth/gmail.send",
-    "https://www.googleapis.com/auth/gmail.readonly"
+    "https://www.googleapis.com/auth/gmail.addons.current.action.compose",
+    "https://www.googleapis.com/auth/drive.appdata"
   ],
   "addOns": {
     "common": {
       "name": "My HTTP Add-on",
-      "logoUrl": "https://www.goodfreephotos.com/albums/vector-images/refresh-icon-vector-clipart.png"
+      "logoUrl": "https://www.goodfreephotos.com/albums/vector-images/refresh-icon-vector-clipart.png",
+      "homepageTrigger": {
+        "runFunction": "https://us-central1-driveaddon-2122.cloudfunctions.net/load_homepage"
+      }
     },
     "gmail": {},
-    "drive": {
-       "homepageTrigger": {
-        "runFunction": "https://us-central1-gold-pier-324719.cloudfunctions.net/load_homepage"
-      },
-       "onItemsSelectedTrigger": {
-        "runFunction": "https://us-central1-gold-pier-324719.cloudfunctions.net/load_homepage"
-      }
+    "drive": {}
     },
     "calendar": {},
     "docs": {},

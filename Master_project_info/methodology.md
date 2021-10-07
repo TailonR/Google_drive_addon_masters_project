@@ -445,5 +445,57 @@ access to certain aspects of the user's Google Drive account. What the app will 
 access for is determined by OAuth Scopes list in the deployment resource file.
 
 ## Step 31
-Moving on to incorporating the use of the Gmail API, the file gmail_handler.py
-was added to the project.
+Moving on to incorporating the use of the Gmail API, the "main" function was renamed to 
+be "authenticate," the section in the code that accesses the Gmail API was deleted, and 
+the function just returns the credentials. The function looks thusly:
+> def authenticate():  
+>&nbsp;&nbsp;&nbsp;&nbsp;scopes = [   
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"https://www.googleapis.com/auth/gmail.addons.current.action.compose",
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"https://www.googleapis.com/auth/gmail.send", 
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"https://www.googleapis.com/auth/gmail.compose",
+>"https://www.googleapis.com/auth/datastore" 
+> &nbsp;&nbsp;&nbsp;&nbsp;]  
+>&nbsp;&nbsp;&nbsp;&nbsp;creds = None  
+>&nbsp;&nbsp;&nbsp;&nbsp;client = datastore.Client("driveaddon-2122")  
+>&nbsp;&nbsp;&nbsp;&nbsp;token = get_most_recent_token(client)  
+>&nbsp;&nbsp;&nbsp;&nbsp;creds = Credentials.from_authorized_user_info(token, scopes)  
+>&nbsp;&nbsp;&nbsp;&nbsp;# If there are no (valid) credentials available, let the user log in.  
+>&nbsp;&nbsp;&nbsp;&nbsp;if not creds or not creds.valid:  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if creds and creds.expired and creds.refresh_token:  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;creds.refresh(Request())  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client = datastore.Client("driveaddon-2122", credentials=creds)  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;store_token(client, creds)  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else:  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flow = InstalledAppFlow.from_client_secrets_file('credentials.json', scopes)  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;creds = flow.run_local_server(port=0)  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Save the credentials for the next run  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client = datastore.Client("driveaddon-2122", credentials=creds)  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;store_token(client, creds)  
+>&nbsp;&nbsp;&nbsp;&nbsp;return creds
+
+This function stores the tokens in Google Datastore which was access using the datastore api.
+This was necessary so that previously created tokens (that are still valid) could be accessed. The previous
+method of storing the token in a file was not working correctly.
+
+## Step 32
+Once the token was able to be accessed, then an email was able to be sent.
+The respond_to_trigger function looked like below:
+>def respond_to_trigger(req):  
+>&nbsp;&nbsp;&nbsp;&nbsp;creds = authenticate()  
+>&nbsp;&nbsp;&nbsp;&nbsp;service = create_service('gmail', 'v1', creds)  
+>&nbsp;&nbsp;&nbsp;&nbsp;user_info = service.users().getProfile(userId='me').execute()  
+>&nbsp;&nbsp;&nbsp;&nbsp;the_sender = user_info["emailAddress"]  
+>&nbsp;&nbsp;&nbsp;&nbsp;the_recipient = "tailrusse2020@gmail.com"  
+>&nbsp;&nbsp;&nbsp;&nbsp;the_subject = "testing again again and again"  
+>&nbsp;&nbsp;&nbsp;&nbsp;the_text = "You should see this when I select a file"  
+>&nbsp;&nbsp;&nbsp;&nbsp;the_message = create_message(the_sender, the_recipient, the_subject, the_text)  
+>&nbsp;&nbsp;&nbsp;&nbsp;send_message(service, "me", the_message)  
+>&nbsp;&nbsp;&nbsp;&nbsp;request_json = req.get_json(silent=True)  
+>&nbsp;&nbsp;&nbsp;&nbsp;selected_itmes = request_json["drive"]["selectedItems"]  
+>&nbsp;&nbsp;&nbsp;&nbsp;first_item = selected_itmes[0]  
+>&nbsp;&nbsp;&nbsp;&nbsp;return create_card(first_item["title"], first_item["iconUrl"])  
+
+## Step 33
+While this was valuable in order to learn more about the Google API, it is not 
+the functionality that is desired for this app as currently, when the item is 
+clicked an email is sent. 
