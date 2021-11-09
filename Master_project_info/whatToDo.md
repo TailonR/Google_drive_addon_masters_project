@@ -11,7 +11,11 @@
 * Fix when credentials are expired and cannot be refreshed (or when none
 exist) and how to get the user to reauthorize without getting the error
 that they must go to a certain link to authorize
+* Make it extensible for new Google drive events or new applications
+* 
 
 ## Questions:
 * Is Google Cloud Datastore the best way to store the tokens?
 * How do I test?
+* How do I save previous page tokens, if sticking with Google Drive API v3?
+* How do I cache the google drive change list result? Just use watch?

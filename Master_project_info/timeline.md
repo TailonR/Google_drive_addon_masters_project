@@ -260,10 +260,95 @@ for that can be found [here](https://cloud.google.com/appengine/docs/standard/py
 I have learned that I did not set up my app engine application and therefore
 I may need to add new steps to my project.
 
+### September 30, 2021
+I learned that I did not need to use app engine and that all I needed 
+to do to store tokens was to save them in a database. This is where 
+I discovered Google Datastore as a database. 
+
 ### October 5, 2021
-For the past week I was working on a way to store tokens. I figured it out by
+For the past few days I was working on a way to store tokens. I figured it out by
 using Google Datastore. However I am not sure if this is best way to do so, 
 becasue the token is stored in plain text. 
 
 As of now, I am able to click on an item in the Google Drive and an email is 
-sent. 
+sent.
+
+### October 12, 2021
+Today is my Talk #1 and the previous week I just worked on the slides for this 
+project.
+
+After my talk these were the comments made by those in the audience (students and 
+teachers):
+* GCP Pub/Sub for watching for events
+* deletion of a file if there are errors
+* logs for when events happen in a text file
+* maybe local counterpart 
+  * To watch to see if the file is downloaded from the local directory 
+  * to let users know if it’s on the machine
+* look into Dropbox instead of Google Drive
+
+Then after that discussion I talked with my committee chair, Dr. Chappell, and this
+is what he said:
+* Mention target audience
+* stop only reading the slides
+  * Slides should have minimal information which allows you to have more 
+  information
+* Be clear on whether the add on is running on browser or not 
+  * Because we need to know if it needs to be open and running on the machine 
+  (do we as the developer have a choice?). 
+  * If it’s running on the server how is that handled? 
+* Aim the app as if it will be handled by a lot of people
+  * Which will influence things like billing
+* I’m am aiming this as offering something Zapier doesn’t 
+* How do you know when the file is downloaded? 
+* It’s important to know if the file is deleted
+* Logs for the app is a good idea
+  * like to have logs for 
+    * start of check
+    * end of check
+    * events triggered
+* Prioritize downloading because if you need to transition to another app, 
+you’d have time to do so
+* Start presentation with a use case “I’m a podcaster…” 
+* Comprehensive exam is in April (first Saturday in April) 
+  * It’s offered once a year, so pass it first go.
+
+### October 15, 2021
+I decided to look into making a companion app. I found [an article](https://medium.com/analytics-vidhya/how-to-build-your-first-desktop-application-in-python-7568c7d74311)
+on creating a desktop application with a GUI.
+
+### October 19, 2021
+For about two days I've been trying to figure out the companion app thing. I got a 
+basic thing running. 
+
+In an effort to avoid paying for things, I tried to see if I could just connect the Google 
+Drive API, which I can but in order to integrate it with Google drive, I'd need to use 
+Google Cloud Platform. There is also another issue that the app would be accessible in the 
+"create new document" dropdown or the "open with" dropdown which is not the right place for 
+the application. Therefore, the Google Worskpace Addon is the right choice if I am to 
+continue using Google Drive.
+
+### October 23, 2021
+I figured out how to set up the GOOGLE_APPLICATION_CREDENTIALS. I followed [this page](https://cloud.google.com/docs/authentication/getting-started).
+Basically I thought that OAuth Client ID was the file the were talking about, but it was actually 
+the Service Account Key. I set up this variable in the environment variables field of the
+edit configurations page in PyCharm. 
+
+I've been looking into how to monitor changes and I kept getting stuck on [this page] (https://developers.google.com/drive/api/v3/push)
+and all it did was tell me that in order to track changes I needed to use the notification 
+service which sends notifications to a domain that you own. This was a problem because I 
+didn't sign up for a domain and doing so would cost money. 
+
+However, then I looked up "track changes with google drive python" and I found this ["Google Drive
+for deveopers article"](https://developers.google.com/drive/api/v3/manage-changes#python) (!!!!) 
+This article showed me how to do it via python.
+
+### October 25, 2021
+What I have found out today is that a Google API update might bring some major changes. An issue 
+I was facing was using v3 of the Google Drive API and getting an empty list of changes. However,
+when I ran the API explorer I got a huge list of changes. Turns out, I was using v3 in the code 
+but was looking at v2 of the API explorer. Turns out, the page token is described as the token 
+used to track future changes, which means that the list of changes you get are all the changes
+that occur after the page token. V3 of the Google Drive API requires the page token, v2 doesn't. 
+This means that you can get all the changes on a file in v2 and unless you have all page tokens for 
+the list, you can only get the future changes using v3. 

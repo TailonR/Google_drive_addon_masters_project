@@ -2,7 +2,8 @@
   "oauthScopes": ["https://www.googleapis.com/auth/drive.addons.metadata.readonly",
     "https://www.googleapis.com/auth/drive.readonly",
     "https://www.googleapis.com/auth/gmail.addons.current.action.compose",
-    "https://www.googleapis.com/auth/drive.appdata"
+    "https://www.googleapis.com/auth/drive.readonly",
+    "https://www.googleapis.com/auth/drive.metadata"
   ],
   "addOns": {
     "common": {
