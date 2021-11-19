@@ -352,3 +352,14 @@ used to track future changes, which means that the list of changes you get are a
 that occur after the page token. V3 of the Google Drive API requires the page token, v2 doesn't. 
 This means that you can get all the changes on a file in v2 and unless you have all page tokens for 
 the list, you can only get the future changes using v3. 
+
+### November 9, 2021
+I found these two articles to help with the linking issue:
+* https://developers.google.com/workspace/add-ons/guides/alternate-runtimes#java_1
+  * I noticed that in the example widgets schema, in the openAs attribute of the openLink section of OnClick, that it was set
+  to "FULL_SIZE" this gave me the idea that this is how I open up a pop-up
+* https://developers.google.com/apps-script/reference/card-service/open-as
+  * Told me how to open up a pop up by setting openAs to "OVERLAY"
+
+Found this article to create a bunch of list items from a string to json: https://www.tutorialspoint.com/How-to-convert-string-to-JSON-using-Python
+I found this article to help me with knowing all the card attributes: https://developers.google.com/workspace/add-ons/reference/rpc/google.apps.card.v1#google.apps.card.v1.Card

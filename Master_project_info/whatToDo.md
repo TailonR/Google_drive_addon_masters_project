@@ -1,4 +1,5 @@
 # What Should This App Do?
+## Possible Funcitionality
 * Allow users to select a file to watch
 * Alert others to changes to the file
   * "Others" meaning people to whom the file is shared
@@ -12,7 +13,7 @@
 exist) and how to get the user to reauthorize without getting the error
 that they must go to a certain link to authorize
 * Make it extensible for new Google drive events or new applications
-* 
+* Make app 
 
 ## Questions:
 * Is Google Cloud Datastore the best way to store the tokens?

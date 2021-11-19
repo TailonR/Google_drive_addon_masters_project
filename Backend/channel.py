@@ -2,11 +2,11 @@ import json
 from google.cloud import logging
 from googleapiclient import errors
 import uuid
-from authorization import authenticate
-from apiMethods import create_service
+from Backend.authorization import authenticate
+from Backend.apiMethods import create_service
 
 
-def dev_create_channel():
+def dev_create_channel(file_id):
     cred = authenticate()
     drive_service = create_service("drive", "v3", cred)
     logger = logging.Client().logger("logger_name")
@@ -19,8 +19,9 @@ def dev_create_channel():
     }
 
     try:
-        page_token = drive_service.changes().getStartPageToken().execute()
-        response = drive_service.changes().watch(pageToken=page_token['startPageToken'], body=body).execute()
+        # page_token = drive_service.changes().getStartPageToken().execute()
+        # response = drive_service.changes().watch(pageToken=page_token['startPageToken'], body=body).execute()
+        response = drive_service.files().watch(fileId=file_id, body=body).execute()
         logger.log_text(json.dumps(response, indent=4))
     except errors.HttpError as error:
         print("An error occurred:", error)
@@ -34,6 +35,16 @@ def dev_stop_channel():
         'id': "324475b8-afb2-48c7-913e-0d853ea71ff9",
         'resourceId': "HOuCEMqvWIxw8YjvZfr4tDKYor8"
     }
+
+    # body = {
+    #     'id': "324475b8-afb2-48c7-913e-0d853ea71ff9",
+    #     'resourceId': "dSWGJjFHcnLREW5WgnHT9IQL-eU"
+    # }
+
+    # body = {
+    #     'id': "324475b8-afb2-48c7-913e-0d853ea71ff9",
+    #     'resourceId': "WZWFx3Y_f1R0EwzeflupSc_e2eQ"
+    # }
 
     try:
         drive_service.channels().stop(body=body).execute()
