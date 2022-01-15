@@ -2,3 +2,5 @@
 Backend/credentials.json
 token.json
 service-account-file.json
+response.json
+.idea

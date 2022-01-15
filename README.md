@@ -10,7 +10,7 @@ such events.
 * PyCharm
 * Python 3.9
 * Google Cloud SDK
-* Google Cloud Functions
+* Google Cloud Run
 * Google Python API
 
 ### Installing Google Cloud SDK
