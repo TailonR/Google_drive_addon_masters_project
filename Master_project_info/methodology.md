@@ -356,7 +356,7 @@ serviceAccountEmail into the command:
 
 Will authorize Google to invoke the app. Note: replace the text "Service_account_email" with 
 the actual service account email. Make sure the name of the function matches the name of the 
-deployed function. 
+deployed function. Do this for every function deployed.
 
 ## Step 28
 Continuing in the [Quickstart for creating an addon in a different language](https://developers.google.com/workspace/add-ons/alternate-runtimes-quickstart),

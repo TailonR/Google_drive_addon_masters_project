@@ -1,3 +1,4 @@
 # To ensure that temporary or user specific files are not added
-tmp/token.json
-Backend/credentials_v1.json
+Backend/credentials.json
+token.json
+service-account-file.json

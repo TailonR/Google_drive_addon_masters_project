@@ -1,10 +1,8 @@
-import sys
 import os
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.cloud import datastore
-import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import Backend.datastoreMethods as dataMethods
 
@@ -13,14 +11,14 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.addons.current.action.compose',
           'https://www.googleapis.com/auth/datastore', 'https://www.googleapis.com/auth/drive.readonly',
           'https://www.googleapis.com/auth/drive.metadata']
 
-REDIRECT_URI = "https://us-central1-driveaddon-2122.cloudfunctions.net/trigger"
+REDIRECT_URI = "https://helloworld-s2377xozpq-uc.a.run.app/trigger"
 
 
 def get_authorization_url():
     # Use the client_secret.json file to identify the application requesting
     # authorization. The client ID (from that file) and access scopes are required.
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        'Backend/credentials_v2.json',
+        'Backend/credentials.json',
         scopes=SCOPES)
 
     # Indicate where the API server will redirect the user after the user completes
@@ -54,7 +52,7 @@ def dev_authenticate():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials_v1.json', SCOPES)
+                'credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
@@ -77,7 +75,7 @@ def authenticate():
             dataMethods.store_token(client, creds)
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials_v1.json', SCOPES)
+                'credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         client = datastore.Client("driveaddon-2122", credentials=creds)

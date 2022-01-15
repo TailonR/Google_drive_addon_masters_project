@@ -2,11 +2,15 @@ import base64
 from email.mime.text import MIMEText
 from googleapiclient import errors
 from googleapiclient.discovery import build
+from Backend import authorization
+from google.cloud import datastore
+import Backend.datastoreMethods as dataMethods
 
 
-def create_service(addon_name, version, creds):
-    service = build(addon_name, version, credentials=creds)
-    return service
+def create_service(addon_name, version):
+    cred = authorization.authenticate()
+    service = build(addon_name, version, credentials=cred)
+    return service, cred
 
 
 # Create a message for an email.
@@ -47,6 +51,43 @@ def send_message(service, user_id, message):
         return message
     except errors.HttpError as error:
         print('An error occurred: %s' % error)
+
+
+def get_files(page_token=0):
+    drive_service, _ = create_service("drive", "v3")
+    # client = datastore.Client("driveaddon-2122", credentials=cred)
+    if page_token == 0:
+        response = drive_service.files().list().execute()
+    else:
+        response = drive_service.files().list(pageToken=page_token).execute()
+
+    return response['files']
+
+
+def create_list_items(page_token=0):
+    files = []
+    files.extend(get_files(page_token))
+    files_list = []
+    for file in files:
+        file_to_add = {
+            "text": file['name'],
+            "value": f"Selection Input {file['name']} Value"
+        }
+        files_list.append(file_to_add)
+    return files_list
+
+
+def get_recent_changes():
+    cred = authorization.authenticate()
+    drive_service, _ = create_service("drive", "v3")
+    client = datastore.Client("driveaddon-2122", credentials=cred)
+    current_page_token = dataMethods.get_current_page_token(client)
+    changes = drive_service.changes().list(pageToken=current_page_token["startPageToken"]).execute()
+    page_token = drive_service.changes().getStartPageToken().execute()
+    # store_new_start_page_token(client, page_token)
+    print(changes)
+    print(page_token)
+    return changes
 
 
 # To get all changes

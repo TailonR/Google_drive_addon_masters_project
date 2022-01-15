@@ -8,13 +8,17 @@
   "addOns": {
     "common": {
       "name": "My HTTP Add-on",
-      "logoUrl": "https://www.goodfreephotos.com/albums/vector-images/refresh-icon-vector-clipart.png",
+      "logoUrl": "https://cdn2.iconfinder.com/data/icons/hand-conversation-solid-style/91/Hand_38-512.png",
       "homepageTrigger": {
-        "runFunction": "https://us-central1-driveaddon-2122.cloudfunctions.net/load_homepage"
+        "runFunction": "https://helloworld-s2377xozpq-uc.a.run.app/"
       }
     },
     "gmail": {},
-    "drive": {},
+    "drive": {
+      "onItemsSelectedTrigger": {
+        "runFunction": "https://helloworld-s2377xozpq-uc.a.run.app/item-selected"
+      }
+    },
     "calendar": {},
     "docs": {},
     "sheets": {},

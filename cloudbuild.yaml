@@ -1,0 +1,27 @@
+# To automate building, pushing, and adding to the container registry of the docker image
+steps:
+ # Build the container image
+ - name: 'gcr.io/cloud-builders/docker'
+   args: ['build', '-t', 'gcr.io/$_PROJECT_ID/$_SERVICE_NAME', '.']
+ # Push the container image to Container Registry
+ - name: 'gcr.io/cloud-builders/docker'
+   args: ['push', 'gcr.io/$_PROJECT_ID/$_SERVICE_NAME']
+ # Deploy container image to Cloud Run
+ - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+   entrypoint: gcloud
+   args:
+   - 'run'
+   - 'deploy'
+   - '$_SERVICE_NAME'
+   - '--image'
+   - 'gcr.io/$_PROJECT_ID/$_SERVICE_NAME'
+   - '--region'
+   - '$_REGION'
+   - '--platform'
+   - 'managed'
+images:
+ - 'gcr.io/$_PROJECT_ID/$_SERVICE_NAME'
+substitutions:
+   _SERVICE_NAME: helloworld
+   _REGION: us-central1
+   _PROJECT_ID: driveaddon-2122
