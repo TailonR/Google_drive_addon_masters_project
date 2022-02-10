@@ -20,30 +20,15 @@ def dev_create_channel(file_id):
         response = drive_service.files().watch(fileId=file_id, body=body).execute()
         logger.log_text(json.dumps(response, indent=4))
     except errors.HttpError as error:
-        print("An error occurred:", error)
+        raise error
 
 
 def dev_stop_channel():
     drive_service, _ = create_service("drive", "v3")
 
-    # body = {
-    #     'id': "324475b8-afb2-48c7-913e-0d853ea71ff9",
-    #     'resourceId': "HOuCEMqvWIxw8YjvZfr4tDKYor8"
-    # }
-
-    # body = {
-    #     'id': "324475b8-afb2-48c7-913e-0d853ea71ff9",
-    #     'resourceId': "dSWGJjFHcnLREW5WgnHT9IQL-eU"
-    # }
-
-    # body = {
-    #     'id': "324475b8-afb2-48c7-913e-0d853ea71ff9",
-    #     'resourceId': "WZWFx3Y_f1R0EwzeflupSc_e2eQ"
-    # }
-
     body = {
         'id': "324475b8-afb2-48c7-913e-0d853ea71ff9",
-        'resourceId': "onBImpQLM_bAiNHDRPz3CajVGPs"
+        'resourceId': "wav2GZZHbXT1bvgMoDt_8tdr4f4"
     }
 
     try:

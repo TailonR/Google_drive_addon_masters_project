@@ -5,9 +5,12 @@
 This is the timeline for the development of the Master project from 
 the creation of the idea through the development of the project.
 
-### March 11th, 2021 
+### May 6th, 2021 
 Developed the original idea and noted the new ideas 
-that Lawlor presented. Then I created the document “Ideas”. 
+that Lawlor presented. 
+
+### May 8th, 2021 
+I created the document “Ideas”. 
 
 ### August 24th, 2021 
 Discussed with CJ Emerson the possibility of using automation for 

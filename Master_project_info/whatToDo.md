@@ -1,5 +1,16 @@
 # What Should This App Do?
-## Possible Funcitionality
+## Finishing-touches functionality
+* Need to store the resourceID of the channels created
+  * May want to have a property that is the file id that the channel is watching
+* Have the homepage show the files that are already being tracked
+* Have a way to extend the lifetime of the channel
+* Show different functionality for the demo on March 1st
+* Track changes for directories
+* Have different message text for when a file is deleted
+* Need to edit the notification card so that it uses proper grammar 
+  * for multiple files say "are" and for a single file say "is"
+
+## Future Funcitionality
 * Allow users to select a file to watch
 * Alert others to changes to the file
   * "Others" meaning people to whom the file is shared
@@ -13,7 +24,7 @@
 exist) and how to get the user to reauthorize without getting the error
 that they must go to a certain link to authorize
 * Make it extensible for new Google drive events or new applications
-* Make app 
+* Make app
 
 ## Questions:
 * Is Google Cloud Datastore the best way to store the tokens?

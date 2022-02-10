@@ -1,4 +1,5 @@
 import base64
+import json
 from email.mime.text import MIMEText
 from googleapiclient import errors
 from googleapiclient.discovery import build
@@ -53,42 +54,51 @@ def send_message(service, user_id, message):
         print('An error occurred: %s' % error)
 
 
-def get_files(page_token=0):
+def file_list_response(page_token=0):
     drive_service, _ = create_service("drive", "v3")
-    # client = datastore.Client("driveaddon-2122", credentials=cred)
     if page_token == 0:
         response = drive_service.files().list().execute()
     else:
         response = drive_service.files().list(pageToken=page_token).execute()
 
-    return response['files']
+    return response
 
 
-def create_list_items(page_token=0):
-    files = []
-    files.extend(get_files(page_token))
-    files_list = []
-    for file in files:
+def create_list_items(files):
+    file_list = []
+    # response = file_list_response()
+    file_list.extend(files)
+    list_items = []
+    for file in file_list:
         file_to_add = {
             "text": file['name'],
-            "value": f"Selection Input {file['name']} Value"
+            "value": json.dumps(file)
+            # "selected": True
         }
-        files_list.append(file_to_add)
-    return files_list
+        list_items.append(file_to_add)
+    return json.dumps(list_items)
 
 
 def get_recent_changes():
-    cred = authorization.authenticate()
-    drive_service, _ = create_service("drive", "v3")
-    client = datastore.Client("driveaddon-2122", credentials=cred)
-    current_page_token = dataMethods.get_current_page_token(client)
-    changes = drive_service.changes().list(pageToken=current_page_token["startPageToken"]).execute()
-    page_token = drive_service.changes().getStartPageToken().execute()
-    # store_new_start_page_token(client, page_token)
-    print(changes)
-    print(page_token)
+    drive_service, cred = create_service("drive", "v3")
+    current_page_token = drive_service.changes().getStartPageToken().execute()
+    page_token = int(current_page_token["startPageToken"]) - 1
+    changes = drive_service.changes().list(pageToken=page_token).execute()
     return changes
 
+
+def respond_to_trigger(req):
+    service, _ = create_service('gmail', 'v1')
+    user_info = service.users().getProfile(userId='me').execute()
+    the_sender = user_info["emailAddress"]
+    the_recipient = "tailrusse2020@gmail.com"
+    the_subject = "testing again again and again"
+    the_text = "You should see this when I select a file"
+    the_message = create_message(the_sender, the_recipient, the_subject, the_text)
+    send_message(service, "me", the_message)
+    request_json = req.get_json(silent=True)
+    selected_itmes = request_json["drive"]["selectedItems"]
+    first_item = selected_itmes[0]
 
 # To get all changes
 # changes = drive_service.changes().list(pageToken=1).execute()
