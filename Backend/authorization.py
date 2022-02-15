@@ -79,8 +79,8 @@ def authenticate():
             flow = InstalledAppFlow.from_client_secrets_file(
                 'credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        client = datastore.Client("driveaddon-2122", credentials=creds)
-        dataMethods.store_token(client, creds)
+            # Save the credentials for the next run
+            client = datastore.Client("driveaddon-2122", credentials=creds)
+            dataMethods.store_token(client, creds)
 
     return creds
