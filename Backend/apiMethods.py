@@ -5,9 +5,18 @@ from googleapiclient.discovery import build
 from Backend import authorization
 
 
-def create_service(addon_name, version):
+# Create a Python representation the given api.
+#
+# Args:
+#   api_name: name of the api to build.
+#   version: the version of the api to build.
+#
+# Returns:
+#   The Python api representation.
+#   The credentials used to authenticate the addon (used for creating channels).
+def create_service(api_name, version):
     cred = authorization.authenticate()
-    service = build(addon_name, version, credentials=cred)
+    service = build(api_name, version, credentials=cred)
     return service, cred
 
 
@@ -52,6 +61,14 @@ def send_message(user_id, message):
         print('An error occurred: %s' % error)
 
 
+# Get a list of files matching the query.
+#
+# Args:
+#   query: The query for matching specific files.
+#   page_token: the token for a specific page of results.
+#
+# Returns:
+#   The results of the query.
 def file_list_response(query, page_token=0):
     drive_service, _ = create_service("drive", "v3")
     if page_token == 0:
@@ -62,6 +79,10 @@ def file_list_response(query, page_token=0):
     return response
 
 
+# Get the recent changes.
+#
+# Returns:
+#   The list of changes.
 def get_recent_changes():
     drive_service, _ = create_service("drive", "v3")
     current_page_token = drive_service.changes().getStartPageToken().execute()
@@ -70,6 +91,14 @@ def get_recent_changes():
     return changes
 
 
+# Get the field of a specific file.
+#
+# Args:
+#   file_id: The id of the specific file.
+#   field: The field requested.
+#
+# Returns:
+#   The field of the file indicated.
 def get_file_fields(file_id, field):
     drive_service, _ = create_service("drive", "v3")
     response = drive_service.files().get(fileId=file_id, fields=field).execute()

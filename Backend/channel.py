@@ -6,6 +6,13 @@ from Backend.apiMethods import create_service
 import Backend.datastoreMethods as datastoreMethods
 
 
+# Create a channel to watch for all changes.
+# Creates the channel then it stores the
+# channel_id and resource_id to the datastore.
+#
+# Throws:
+#   If creating a channel fails the function
+#   will raise the same error.
 def create_channel():
     drive_service, cred = create_service("drive", "v3")
     logger = logging.Client().logger("logger_name")
@@ -27,6 +34,13 @@ def create_channel():
         raise error
 
 
+# Stops a channel from watching for changes (essentially deletes it).
+# Stops the channel then it deletes the channel information
+# from the datastore.
+#
+# Throws:
+#   If stopping a channel fails the function
+#   will raise the same error.
 def stop_channel():
     drive_service, _ = create_service("drive", "v3")
     channel_info = datastoreMethods.get_channel_info()
@@ -42,4 +56,4 @@ def stop_channel():
         drive_service.channels().stop(body=body).execute()
         datastoreMethods.delete_datastore_entity("Channels", "changes")
     except errors.HttpError as error:
-        print("An error occurred:", error)
+        raise error

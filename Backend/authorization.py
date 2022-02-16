@@ -1,10 +1,7 @@
-import sys
-import os
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.cloud import datastore
-import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import Backend.datastoreMethods as dataMethods
 
@@ -16,6 +13,10 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.addons.current.action.compose',
 REDIRECT_URI = "https://helloworld-s2377xozpq-uc.a.run.app/trigger"
 
 
+# Get the url used to authenticate the addon.
+#
+# Returns:
+#   The authorization url.
 def get_authorization_url():
     # Use the client_secret.json file to identify the application requesting
     # authorization. The client ID (from that file) and access scopes are required.
@@ -41,6 +42,15 @@ def get_authorization_url():
     return authorization_url
 
 
+# Authenticate the addon.
+# Acquires tokens from the datastore, if it exists.
+# If there is no token, then create a new token
+# and save the new token to the datastore.
+# If there is a token but it is expired,
+# then refresh the token and save it in the datastore.
+#
+# Returns:
+#   The acquired/created credentials.
 def authenticate():
     creds = None
     client = datastore.Client("driveaddon-2122")

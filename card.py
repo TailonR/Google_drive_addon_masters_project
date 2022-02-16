@@ -1,3 +1,10 @@
+# Class Card.
+#
+# This class create a json representation
+# of a card.
+# This class contains methods that will return
+# json objects that instructs Google Workspace
+# on how to add the card to the stack.
 class Card:
     def __init__(self, data):
         if isinstance(data, str):
@@ -38,18 +45,6 @@ class Card:
             widget_item_type: widget_item
         })
 
-    def create_card_header(self, title, subtitle, image_type, image_url, image_alt_text):
-        self._card_header = {
-            "title": title,
-            "subtitle": subtitle,
-            "imageType": image_type,
-            "imageUrl": image_url,
-            "imageAltText": image_alt_text
-        }
-
-    def update_card_header(self, card_header):
-        self._card["peakCardHeader"] = card_header
-
     def create_card(self, name_id, card_fixed_footer=None, display_style="REPLACE"):
         self._card = {
             "header": self._header,
@@ -62,26 +57,6 @@ class Card:
         }
         self.update_action()
 
-    def get_button_list(self):
-        return self._card["sections"]["widgets"]["buttonList"]
-
-    def insert_card(self):
-        self._action = {
-            "action": {
-                "navigations": [
-                    {
-                        "pushCard": self._card
-                    }
-                ]
-            }
-        }
-
-    def create_card_action(self, label, on_click_action):
-        self._card_actions.append({
-            "actionLabel": label,
-            "onClick": on_click_action
-        })
-
     def update_action(self):
         self._action = {
             "action": {
@@ -93,6 +68,14 @@ class Card:
             }
         }
 
+    # Return the json representation of the card.
+    # The navigations tell Google Workspace that
+    # it should remove the previous card and to
+    # push this card to the stack.
+    #
+    # Returns:
+    #   A json representation of the card and actions
+    #   that Google Workspace should conduct.
     def replace_card(self):
         return {
             "renderActions": {
@@ -109,13 +92,32 @@ class Card:
             }
         }
 
+    # Return the json representation of the card.
+    # This function tells Google Workspace to push
+    # the card as a render instruction.
+    #
+    # Returns:
+    #   A json representation of the card with render
+    #   instructions.
     def push_card(self):
         return {
             "renderActions": self._action  # used to be get_action()
         }
 
+    # Return json representation of the card.
+    # This simply tells Google Workspace to
+    # push the card to the stack.
+    #
+    # Returns:
+    #   A json representation of the card and actions
+    #   that Google Workspace should conduct.
     def display_card(self):
         return self._action
 
+    # Return json representation of the card.
+    # This simply returns the card with no instructions
+    #
+    # Returns:
+    #   A json representation of the card.
     def get_card(self):
         return self._card
