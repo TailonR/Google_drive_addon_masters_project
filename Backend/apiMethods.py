@@ -1,11 +1,8 @@
 import base64
-import json
 from email.mime.text import MIMEText
 from googleapiclient import errors
 from googleapiclient.discovery import build
 from Backend import authorization
-from google.cloud import datastore
-import Backend.datastoreMethods as dataMethods
 
 
 def create_service(addon_name, version):
@@ -66,8 +63,14 @@ def file_list_response(query, page_token=0):
 
 
 def get_recent_changes():
-    drive_service, cred = create_service("drive", "v3")
+    drive_service, _ = create_service("drive", "v3")
     current_page_token = drive_service.changes().getStartPageToken().execute()
     page_token = int(current_page_token["startPageToken"]) - 1
     changes = drive_service.changes().list(pageToken=page_token).execute()
     return changes
+
+
+def get_file_fields(file_id, field):
+    drive_service, _ = create_service("drive", "v3")
+    response = drive_service.files().get(fileId=file_id, fields=field).execute()
+    return response

@@ -1,15 +1,6 @@
 import json
-import Backend.channel as channel
-from googleapiclient import errors
 import Backend.datastoreMethods as datastoreMethods
 import Backend.apiMethods as Methods
-
-
-def get_item_name(input_value):
-    input_value = input_value.replace("Selection Input", "")
-    input_value = input_value.replace("Value", "")
-    input_value = input_value.strip()
-    return input_value
 
 
 def get_string_input_values(form_submit_response):
@@ -92,14 +83,6 @@ def get_file_attribute(file_json, attribute):
             if key == attribute:
                 file_attributes.append(value)
     return file_attributes
-
-
-def create_channels(file_ids):
-    try:
-        for fid in file_ids:
-            channel.create_channel(fid)
-    except errors.HttpError as error:
-        raise error
 
 
 def send_message(files, parent_id=""):
