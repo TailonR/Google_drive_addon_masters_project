@@ -1,7 +1,7 @@
 import json
 import os
-import uuid
 import cards
+import time
 from card import Card
 from flask import Flask, request
 from Backend import apiMethods as Methods
@@ -32,8 +32,8 @@ def get_more_items():
     req_json = request.get_json(silent=True)
     next_page_token = req_json["commonEventObject"]["parameters"]["nextPageToken"]
     called_by = req_json["commonEventObject"]["parameters"]["from"]  # could have another parameter, that is the index
-    card: Card                                                       # of the max-limited response (If the response
-    if called_by == "folder":                                        # gives me more results than the max limit)
+    card: Card  # of the max-limited response (If the response
+    if called_by == "folder":  # gives me more results than the max limit)
         card = cards.list_card(False, next_page_token)
     else:
         card = cards.list_card(True, next_page_token)
@@ -68,10 +68,7 @@ def go_back():
 def item_selected():
     req_json = request.get_json(silent=True)
     selected_items = req_json["drive"]["selectedItems"]
-    selected_items_string = []
-    for selected_item in selected_items:
-        selected_items_string.append(json.dumps(selected_item))
-    card = cards.item_tracking_card(selected_items_string)
+    card = cards.item_tracking_card(selected_items)
     return card.display_card()
 
 
@@ -86,13 +83,13 @@ def trigger():
     # Send messages to the correct emails, if any.
     for file_id in file_ids:
         # Send messages for the check-marked files.
-        if datastoreMethods.get_emails(file_id) is not None:
+        if datastoreMethods.get_tracked_file_info(file_id) is not None:
             auxMethods.send_message(changes["changes"])
         else:
             # Send messages for the check-marked folders.
             response = Methods.get_file_fields(file_id, "parents")
             for parent_id in response["parents"]:
-                if datastoreMethods.get_emails(parent_id) is not None:
+                if datastoreMethods.get_tracked_file_info(parent_id) is not None:
                     auxMethods.send_message(changes["changes"], parent_id)
     return cards.notification_card("")
 
@@ -114,31 +111,33 @@ def track_item():
         form_inputs = req_json["commonEventObject"]["formInputs"]
         emails = auxMethods.get_emails(form_inputs)
 
-    # Get the json representation for the selected files.
-    files = req_json["commonEventObject"]["parameters"]["selectedFiles"]
-
-    # Get the file_ids for the check-marked file, or if the file is a folder,
-    # the file_ids of the files inside the folder, and store them in the datastore
-    for file in json.loads(files):
-        file_loaded = json.loads(file)
-        if file_loaded["mimeType"] == "application/vnd.google-apps.folder":
-            response = Methods.file_list_response(f"'{file_loaded['id']}' in parents")
-            child_file_ids = [file["id"] for file in response["files"]]
-            datastoreMethods.store_emails([file_loaded["id"]], emails)
-            datastoreMethods.store_emails(child_file_ids, emails)
-        else:
-            datastoreMethods.store_emails(file_loaded["id"], emails)
-
+    # Create a channel for change notifications
     try:
         # Only create a channel if none exists already
-        if datastoreMethods.get_channel_info() is None:
+        channel_entity = datastoreMethods.get_channel_info()
+        curr_time_ms = round(time.time() * 1000)
+        if channel_entity is None or int(channel_entity["expiration"]) < curr_time_ms:
             channel.create_channel()
     except errors.HttpError as error:
         message = f"An error occurred: {error}"
         return cards.notification_card(message)
+    # Get the json representation for the selected files.
+    files = json.loads(req_json["commonEventObject"]["parameters"]["selectedFiles"])
+
+    # Get the file_ids for the check-marked file, or if the file is a folder,
+    # the file_ids of the files inside the folder, and store them in the datastore
+    for file in files:
+        if "name" in file:
+            datastoreMethods.store_file_info(file["id"], file["name"], emails)
+        elif "title" in file:
+            datastoreMethods.store_file_info(file["id"], file["title"], emails)
 
     # Return a notification card
-    file_names = auxMethods.get_file_property(json.loads(files), "name")
+    file_names = []
+    if "name" in files[0]:
+        file_names = auxMethods.get_file_property(files, "name")
+    elif "title" in files[0]:
+        file_names = auxMethods.get_file_property(files, "title")
     comma_delimiter = ", "
     message = f"{comma_delimiter.join(file_names)} {'are' if len(file_names) > 1 else 'is'} tracked"
     return cards.notification_card(message)
@@ -151,26 +150,10 @@ def track_item():
 @app.route("/add-email", methods=['POST'])
 def add_email():
     req_json = request.get_json(silent=True)
-    # Get the json representation of card
-    card_string = req_json["commonEventObject"]["parameters"]["card"]
-    card_json = json.loads(card_string)
-    # Create a new card based on the json of the old one
-    copy_of_card = Card(card_json)
-    input_name = str(uuid.uuid4())
-    text_input = {
-        "name": f"Email {input_name}",
-        "label": "Enter Email",
-        "value": "",
-    }
-    # Add a new text input widget along with a "add email" button
-    copy_of_card.add_widget("textInput", text_input)
-    button_list = {
-        "buttons": [
-            auxMethods.build_add_email_button(copy_of_card.get_card(), text_input)
-        ]
-    }
-    copy_of_card.add_widget("buttonList", button_list)
-    return copy_of_card.replace_card()
+    previous_email_inputs = json.loads(req_json["commonEventObject"]["parameters"]["previousEmailInputs"])
+    selected_files = json.loads(req_json["commonEventObject"]["parameters"]["selectedFiles"])
+    card = cards.item_tracking_card(selected_files, previous_email_inputs)
+    return card.replace_card()
 
 
 # Create the item tracking card.
@@ -181,8 +164,44 @@ def add_email():
 def item_tracking():
     req_json = request.get_json(silent=True)
     selected_files = auxMethods.get_string_input_values(req_json)
+    for index in range(0, len(selected_files)):
+        selected_files[index] = json.loads(selected_files[index])
     card = cards.item_tracking_card(selected_files)
     return card.push_card()
+
+
+# Create the stop tracking card.
+#
+# Returns:
+#   The json representation of the stop tracking card.
+@app.route("/stop-tracking", methods=['POST'])
+def stop_tracking():
+    tracked_files_info = datastoreMethods.get_tracked_file_info()
+    card = cards.stop_tracking_card(tracked_files_info)
+    return card.push_card()
+
+
+# Deletes tracking information for the selected files
+@app.route("/end-tracking", methods=['POST'])
+def end_tracking():
+    req_json = request.get_json(silent=True)
+    selected_file_ids: []
+    if "formInputs" in req_json:
+        selected_file_ids = auxMethods.get_string_input_values(req_json)
+    else:
+        selected_files = json.loads(req_json["commonEventObject"]["parameters"]["selectedFiles"])
+        selected_file_ids = [file["id"] for file in selected_files]
+
+    file_entities = datastoreMethods.get_tracked_file_info()
+    for entity in file_entities:
+        if entity.key.id_or_name in selected_file_ids:
+            datastoreMethods.delete_datastore_entity("TrackedFiles", entity.key.id_or_name)
+        if len(datastoreMethods.get_tracked_file_info()) == 0:
+            channel.stop_channel()
+    if len(file_entities) > 0:
+        return cards.notification_card("The selected files are no longer being tracked")
+    else:
+        return cards.notification_card("The selected Files are not being tracked")
 
 
 if __name__ == "__main__":

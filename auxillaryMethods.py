@@ -22,20 +22,31 @@ def get_string_input_values(form_submit_response):
 # Args:
 #   selected_items: the selected items.
 #   given_card: the card to add the widgets to.
-def add_text_widgets(selected_items, given_card):
+def add_text_widgets(selected_items, card):
     for selected_item in selected_items:
-        loaded_json = json.loads(selected_item)
         widget_item = {}
-        if "name" in loaded_json:
+        if "name" in selected_item:
             widget_item = {
-                "text": loaded_json["name"]
+                "text": selected_item["name"]
             }
-        elif "title" in loaded_json:
+        elif "title" in selected_item:
             widget_item = {
-                "text": loaded_json["title"]
+                "text": selected_item["title"]
             }
 
-        given_card.add_widget("textParagraph", widget_item)
+        card.add_widget("textParagraph", widget_item)
+
+
+# Get the file_ids that are being tracked.
+# Helps with the list card
+def get_all_file_ids_tracked():
+    files_info = datastoreMethods.get_tracked_file_info()
+    if files_info is None:
+        return None
+    file_ids_for_emails = []
+    for info in files_info:
+        file_ids_for_emails.append(info.key.id_or_name)
+    return file_ids_for_emails
 
 
 # Create list items for the list card.
@@ -45,58 +56,37 @@ def add_text_widgets(selected_items, given_card):
 #
 # Returns:
 #   A json representation of a list of the given files.
-def create_list_items(files):
+def create_list_items_for_list_card(files):
     file_list = []
     file_list.extend(files)
     list_items = []
     for file in file_list:
-        # check if the file already
-        # is being tracked
+        # check if the file already is being tracked
         file_to_add = {
             "text": file['name'],
-            "value": json.dumps(file)
-            # "selected": True
+            "value": json.dumps(file),
         }
         list_items.append(file_to_add)
-    return json.dumps(list_items)
+    return list_items
 
 
-# Create a json representation of the "add email" button.
+# Create list items for the stop tracking card.
 #
 # Args:
-#   card_json: The json representation of the
-#   card to add the email button to.
-#   text_input: the json representation of the
-#   text input widget to be added in the next card.
+#   files: The files to make the list out of.
 #
 # Returns:
-#   A json representation of the "add email" button.
-def build_add_email_button(card_json, text_input):
-    return {
-        "text": "+Add Email",
-        "disabled": False,
-        "color": {
-            "red": 0.32421,
-            "blue": 0.23421,
-            "green": 0.2353614
-        },
-        "onClick": {
-            "action": {
-                "function": "https://helloworld-s2377xozpq-uc.a.run.app/add-email",
-                "parameters": [
-                    {
-                        "key": "card",
-                        "value": json.dumps(card_json)
-                    },
-                    {
-                        "key": "textInput",
-                        "value": json.dumps(text_input)
-                    }
-                ],
-                "persistValues": True
-            }
+#   A json representation of a list of the given files.
+def create_list_items_for_stop_tracking_card(tracked_file_info):
+    list_items = []
+    for file_info in tracked_file_info:
+        # check if the file already is being tracked
+        file_to_add = {
+            "text": file_info["fileName"],
+            "value": file_info.key.id_or_name,
         }
-    }
+        list_items.append(file_to_add)
+    return list_items
 
 
 # Get the emails from the form input.
@@ -127,8 +117,7 @@ def get_emails(form_inputs):
 def get_file_property(file_json, attribute):
     file_attributes = []
     for file in file_json:
-        file_loaded = json.loads(file)
-        for key, value in file_loaded.items():
+        for key, value in file.items():
             if key == attribute:
                 file_attributes.append(value)
     return file_attributes
@@ -148,34 +137,13 @@ def send_message(files, parent_id=""):
         file_id = file["fileId"]
         emails: []
         if parent_id == "":
-            emails = datastoreMethods.get_emails(file_id)
+            emails = datastoreMethods.get_tracked_file_info(file_id, "emails")
         else:
-            emails = datastoreMethods.get_emails(parent_id)
+            emails = datastoreMethods.get_tracked_file_info(parent_id, "emails")
 
         subject = f"{file['file']['name']} has been updated"
         for email in emails:
-            recipient = email
-            name = recipient[0:5]
+            name = email[0:5]
             text = f"Hello {name}, \nIf you are seeing this, then a file had been edited"
-            email_bytes = Methods.create_message(source, recipient, subject, text)
+            email_bytes = Methods.create_message(source, email, subject, text)
             Methods.send_message("me", email_bytes)
-
-
-# Filters the given items into a list of folders
-# and a list of files.
-#
-# Args:
-#   files: The files to filter.
-#
-# Returns:
-#   A list of folders and a list of files
-def filter_items(files):
-    folder_list = []
-    file_list = []
-    for file in files:
-        if file["mimeType"] == "application/vnd.google-apps.folder":
-            folder_list.append(file)
-        else:
-            file_list.append(file)
-
-    return folder_list, file_list

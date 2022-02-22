@@ -1,7 +1,7 @@
 import json
-from datetime import datetime
+import time
 from google.cloud import datastore
-
+from datetime import datetime
 
 # Store a new token.
 #
@@ -61,41 +61,53 @@ def token_exists():
         return False
 
 
-# Store the emails to be notified on file changes.
+# Store the file information of file to be tracked.
 #
 # Args:
 #   file_ids: the ids that will be stored in the datastore.
-#   emails: the emails associated with the file_id.
-def store_emails(file_ids, emails):
+#   emails: the emails associated with the file_ids.
+#   parent_id: the parent of the file.
+def store_file_info(file_id, file_name, emails):
     datastore_client = datastore.Client()
-    for file_id in file_ids:
-        if get_emails(file_id) is not None:
-            continue
-        complete_key = datastore_client.key("Emails", file_id)
-        email_entity = datastore.Entity(key=complete_key)
-        email_entity.update({
-            "start": datetime.now(),
-            "emails": emails
-        })
-        datastore_client.put(email_entity)
+    complete_key = datastore_client.key("TrackedFiles", file_id)
+    email_entity = datastore.Entity(key=complete_key)
+    email_entity.update({
+        "fileName": file_name,
+        "emails": emails,
+    })
+    datastore_client.put(email_entity)
 
 
-# Get the emails associated with the given file_id.
-#
+# Get the file information associated with the given file_id.
+# Such information includes the parent_id and the email addresses to
 # Args:
 #   file_id: the id to look for in the datastore.
+#   attribute: the attribute to return.
 #
 # Returns:
-#   The emails associated with the file_id
-#   or none if the id doesn't exist in the table.
-def get_emails(file_id):
+#   The table entities associated with given the file_id in their key
+#   or none if it doesn't exist.
+#   If no file_id is provided, all entries in the table
+#   If no attribute, all entity attributes
+def get_tracked_file_info(file_id=None, attribute=None):
     datastore_client = datastore.Client()
-    key = datastore_client.key("Emails", file_id)
-    results = datastore_client.get(key)
-    if results is not None:
-        return results["emails"]
-    else:
-        return None
+    if file_id is not None and attribute is not None:  # Return the given attribute of the given file_id
+        key = datastore_client.key("TrackedFiles", file_id)
+        result = datastore_client.get(key)
+        if result is not None:
+            return result[attribute]
+        else:
+            return None
+    elif file_id is not None and attribute is None:  # Return the entire entity of the given file_id
+        key = datastore_client.key("TrackedFiles", file_id)
+        result = datastore_client.get(key)
+        if result is not None:
+            return result
+        else:
+            return None
+    elif file_id is None and attribute is None:  # Return all entities in the table
+        query = datastore_client.query(kind="TrackedFiles")
+        return list(query.fetch())
 
 
 # Store the channel information.
@@ -103,13 +115,14 @@ def get_emails(file_id):
 # Args:
 #   channel_id: the channel_id for the channel.
 #   resource_id: the resource_id for the channel.
-def store_channel_info(channel_id, resource_id):
+def store_channel_info(channel_id, resource_id, expiration):
     datastore_client = datastore.Client()
     key = datastore_client.key("Channels", "changes")
     channel_entity = datastore.Entity(key=key)
     channel_entity.update({
         "channelId": channel_id,
-        "resourceId": resource_id
+        "resourceId": resource_id,
+        "expiration": expiration
     })
     datastore_client.put(channel_entity)
 
@@ -134,3 +147,17 @@ def delete_datastore_entity(kind, file_id):
     datastore_client = datastore.Client()
     key = datastore_client.key(kind, file_id)
     datastore_client.delete(key)
+
+
+# Delete multiple datastore entities of the same kind.
+#
+# Args:
+#   kind: the kind of the entity to be deleted.
+#   file_ids: the file_ids of the entities to be deleted.
+def delete_datastore_entities(kind, file_ids):
+    datastore_client = datastore.Client()
+    keys = []
+    for file_id in file_ids:
+        keys.append(datastore_client.key(kind, file_id))
+
+    datastore_client.delete_multi(keys)

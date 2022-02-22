@@ -7,29 +7,15 @@
 # on how to add the card to the stack.
 class Card:
     def __init__(self, data):
-        if isinstance(data, str):
-            self._widgets = []
-            self._sections = []
-            self._card_actions = []
-            self._card_header = {}
-            self._action = {}
-            self._card = {}
-            self._header = {
-                "title": data
-            }
-        elif isinstance(data, dict):
-            self.create_card_from_json(data)
-
-    def create_card_from_json(self, card_json):
-        self._widgets = card_json["sections"][0]["widgets"]
-        self._sections = card_json["sections"]
-        self._card_actions = card_json["cardActions"]
-        self._card_header = card_json["peekCardHeader"]
-        self._card = card_json
+        self._widgets = []
+        self._sections = []
+        self._card_actions = []
+        self._card_header = {}
+        self._action = {}
+        self._card = {}
         self._header = {
-            "title": card_json["header"]["title"]
+            "title": data
         }
-        self.update_action()
 
     def add_section(self, header, collapsible, uncollapsible_widgets_count=0):
         self._sections.append({
@@ -91,6 +77,23 @@ class Card:
                 }
             }
         }
+
+    # Return the widgets of the card.
+    # The parameter "kind" indicates the kind of widgets
+    # to return.
+    # If no kind is provided then return all the widgets.
+    #
+    # Returns:
+    #   The widgets of the card.
+    def get_widgets(self, kind=None):
+        if kind is not None:
+            specific_widgets = []
+            for widget in self._widgets:
+                if kind in widget:
+                    specific_widgets.append(widget)
+            return specific_widgets
+        else:
+            return self._widgets
 
     # Return the json representation of the card.
     # This function tells Google Workspace to push

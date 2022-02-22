@@ -16,6 +16,23 @@ def homepage_card(page_token=0):
     folder_card = list_card(False, page_token)
     file_card = list_card(True, page_token)
 
+    fixed_footer = {
+        "primaryButton": {
+            "text": "Stop Tracking",
+            "color": {
+                "red": 0,
+                "blue": 0,
+                "green": 0
+            },
+            "disabled": False if len(auxMethods.get_all_file_ids_tracked()) > 0 else True,
+            "onClick": {
+                "action": {
+                    "function": "https://helloworld-s2377xozpq-uc.a.run.app/stop-tracking",
+                }
+            }
+        }
+    }
+
     # This will direct users who click on it to the list of folders
     decorated_text_folders = {
         "topLabel": "Select Folders",
@@ -36,7 +53,7 @@ def homepage_card(page_token=0):
 
     # Create the card
     home_card = Card("Main Card")
-    home_card.create_card("Files or Folders to track")
+    home_card.create_card("Files or Folders to track", fixed_footer)
     home_card.update_action()
     home_card.add_section("Go to Folders or Files", False)
     home_card.add_widget("decoratedText", decorated_text_folders)
@@ -62,8 +79,6 @@ def list_card(file_flag, page_token):
         response = Methods.file_list_response("mimeType='application/vnd.google-apps.folder'", page_token)
 
     next_page_token = response["nextPageToken"] if "nextPageToken" in response else -1
-    tuple_of_folders_and_files = auxMethods.filter_items(response["files"])
-    items = tuple_of_folders_and_files[file_flag]  # the items will either folders or files depending on the flag
 
     # This fixed_footer contains the buttons that allows users to submit the selected files to the item tracking card
     # and [another button].
@@ -148,7 +163,7 @@ def list_card(file_flag, page_token):
         "name": "Selection Input",
         "label": "Selection Input",
         "type": "CHECK_BOX",
-        "items": json.loads(auxMethods.create_list_items(items)),
+        "items": auxMethods.create_list_items_for_list_card(response["files"]),
     }
 
     # Create the card
@@ -168,18 +183,11 @@ def list_card(file_flag, page_token):
 # Returns:
 #   The Card object containing the json representation of the
 #   item tracking card.
-def item_tracking_card(selected_files):
+def item_tracking_card(selected_files, previous_email_inputs=None):
     card = Card("Notifications")
-    email_attribute_name = str(uuid.uuid4())
-    # This text input contains the field where users can enter their emails
-    text_input = {
-        "name": f"Email {email_attribute_name}",
-        "label": "Enter Email",
-        "value": "",
-    }
     # This fixed_footer contains the buttons that allows users to submit the
     # provided emails to be associated with the selected files
-    # and [implement the cancel button].
+    # and that allows users to end tracking of the selected files.
     fixed_footer = {
         "primaryButton": {
             "text": "Submit",
@@ -202,17 +210,21 @@ def item_tracking_card(selected_files):
             }
         },
         "secondaryButton": {
-            "text": "Cancel",
+            "text": "Stop Tracking",
             "color": {
                 "red": 0,
                 "blue": 0,
                 "green": 0
             },
             "onClick": {
-                "openLink": {
-                    "url": "www.dropbox.com",
-                    "onClose": "NOTHING",  # Change this
-                    "openAs": "OVERLAY"
+                "action": {
+                    "function": "https://helloworld-s2377xozpq-uc.a.run.app/end-tracking",
+                    "parameters": [
+                        {
+                            "key": "selectedFiles",
+                            "value": json.dumps(selected_files)
+                        }
+                    ],
                 }
             }
         }
@@ -222,16 +234,64 @@ def item_tracking_card(selected_files):
     card.create_card("Files selected", fixed_footer)
     card.add_section("Enter emails to be notified", False)
     auxMethods.add_text_widgets(selected_files, card)
+
+    # If a user clicked the "add email" button then we need to add
+    # the text inputs that contain the emails the user already entered
+    # to the new card.
+    if previous_email_inputs is not None:
+        for email_input in previous_email_inputs:
+            card.add_widget("textInput", email_input["textInput"])
+
+    # The text input contains the field where users can enter their emails.
+    # The value of this field (not to be confused with the value attribute of text_input)
+    # is passed to the add_email function request so that previously entered emails
+    # can be preserved in the new card.
+    email_attribute_name = str(uuid.uuid4())
+    text_input = {
+        "name": f"Email {email_attribute_name}",
+        "label": "Enter Email",
+        "value": "",
+    }
     card.add_widget("textInput", text_input)
-    # Create the "add email" button. This must be done after
-    # creating the card so that the entire json representation of the
-    # card used in the parameters field of the request sent to /track-item
-    # can be created.
+
+    # This button list contains the button to add an email.
+    # The url that the button calls is given by the function attribute of
+    # the onClick action.
+    # The request to this url will pass parameters to it, as indicated
+    # by the parameters attribute of the onClick action.
+    # In order to make a new card it needs to be the same as the old card,
+    # just with an additional textInput.
+    # Therefore the parameters given are the previously entered emails, and
+    # the selected items.
     button_list = {
         "buttons": [
-            auxMethods.build_add_email_button(card.get_card(), text_input)  # Might want to do this as having a
-        ]                                                                   # counter to count the number add email buttons,
-    }                                                                       # and then create that number of buttons
+            {
+                "text": "+Add Email",
+                "disabled": False,
+                "color": {
+                    "red": 0.32421,
+                    "blue": 0.23421,
+                    "green": 0.2353614
+                },
+                "onClick": {
+                    "action": {
+                        "function": "https://helloworld-s2377xozpq-uc.a.run.app/add-email",
+                        "parameters": [
+                            {
+                                "key": "previousEmailInputs",
+                                "value": json.dumps(card.get_widgets("textInput"))
+                            },
+                            {
+                                "key": "selectedFiles",
+                                "value": json.dumps(selected_files)
+                            }
+                        ],
+                        "persistValues": True
+                    }
+                }
+            }
+        ]
+    }
     card.add_widget("buttonList", button_list)
     return card
 
@@ -253,4 +313,45 @@ def notification_card(text):
             }
         }
     }
-    return json.dumps(submit_form_response)
+    return submit_form_response
+
+
+# Get the json representation of the list of folders and files being tracked.
+# Returns:
+#   The json representation of the list card.
+def stop_tracking_card(tracked_files_info):
+    # This fixed_footer contains a submit button which, once clicked,
+    # sends the selected files to the end_tracking function
+    fixed_footer = {
+        "primaryButton": {
+            "text": "Submit",
+            "color": {
+                "red": 0,
+                "blue": 0,
+                "green": 0
+            },
+            "onClick": {
+                "action": {
+                    "function": "https://helloworld-s2377xozpq-uc.a.run.app/end-tracking",
+                }
+            }
+        }
+    }
+
+    # This widget contains the list of results indicated by the page_token along with
+    # a checkbox next to each item.
+    selection_input_item = {
+        "name": "Selection Input",
+        "label": "Selection Input",
+        "type": "CHECK_BOX",
+        "items": auxMethods.create_list_items_for_stop_tracking_card(tracked_files_info),
+    }
+
+    # Create the card
+    card = Card("Stop Tracking Card")
+    card.update_action()
+    card.create_card(" Files/Folders to Stop Watching", fixed_footer)
+    card.add_section("Select Files/Folders", False)
+    card.add_widget("selectionInput", selection_input_item)
+    return card
+

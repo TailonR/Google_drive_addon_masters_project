@@ -15,7 +15,6 @@ import Backend.datastoreMethods as datastoreMethods
 #   will raise the same error.
 def create_channel():
     drive_service, cred = create_service("drive", "v3")
-    logger = logging.Client().logger("logger_name")
 
     channel_id = str(uuid.uuid4())
     body = {
@@ -28,8 +27,8 @@ def create_channel():
     try:
         current_page_token = drive_service.changes().getStartPageToken().execute()
         response = drive_service.changes().watch(body=body, pageToken=current_page_token["startPageToken"]).execute()
-        datastoreMethods.store_channel_info(channel_id, response["resourceId"])
-        logger.log_text(json.dumps(response, indent=4))
+        datastoreMethods.store_channel_info(channel_id, response["resourceId"], response["expiration"])
+        print(response)
     except errors.HttpError as error:
         raise error
 
