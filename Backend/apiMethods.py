@@ -3,7 +3,7 @@ from email.mime.text import MIMEText
 from googleapiclient import errors
 from googleapiclient.discovery import build
 from Backend import authorization
-
+from Backend import datastoreMethods
 
 # Create a Python representation the given api.
 #
@@ -55,7 +55,7 @@ def send_message(user_id, message):
     try:
         message = (gmail_service.users().messages().send(userId=user_id, body=message)
                    .execute())
-        print('Message Id: %s' % message['id'])
+        print('Message Id:', message['id'])
         return message
     except errors.HttpError as error:
         print('An error occurred: %s' % error)
@@ -81,13 +81,16 @@ def file_list_response(query, page_token=0):
 
 # Get the recent changes.
 #
+# Args:
+#   page_token: the token to get the page of results.
+#
 # Returns:
 #   The list of changes.
 def get_recent_changes():
     drive_service, _ = create_service("drive", "v3")
-    current_page_token = drive_service.changes().getStartPageToken().execute()
-    page_token = int(current_page_token["startPageToken"]) - 1
-    changes = drive_service.changes().list(pageToken=page_token).execute()
+    previous_page_token = datastoreMethods.get_start_page_token()
+    changes = drive_service.changes().list(pageToken=previous_page_token["previousPageToken"]).execute()
+    datastoreMethods.store_start_page_tokens(changes["newStartPageToken"])
     return changes
 
 
