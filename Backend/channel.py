@@ -19,7 +19,7 @@ def create_channel():
         'id': channel_id,
         'token': cred.token,
         'type': "web_hook",
-        'address': "https://helloworld-s2377xozpq-uc.a.run.app/trigger"
+        'address': "https://filewatch-s2377xozpq-uc.a.run.app/trigger"
     }
 
     try:

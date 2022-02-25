@@ -28,7 +28,7 @@ def homepage_card(page_token=0):
             "disabled": False if len(Datastore.get_all_file_ids_tracked()) > 0 else True,
             "onClick": {
                 "action": {
-                    "function": "https://helloworld-s2377xozpq-uc.a.run.app/stop-tracking",
+                    "function": "https://filewatch-s2377xozpq-uc.a.run.app/stop-tracking",
                 }
             }
         }
@@ -92,7 +92,7 @@ def list_card(file_flag, page_token):
             },
             "onClick": {
                 "action": {
-                    "function": "https://helloworld-s2377xozpq-uc.a.run.app/file-tracking",
+                    "function": "https://filewatch-s2377xozpq-uc.a.run.app/file-tracking",
                 }
             }
         }
@@ -110,7 +110,7 @@ def list_card(file_flag, page_token):
                 "disabled": True if page_token == 0 else False,
                 "onClick": {
                     "action": {
-                        "function": "https://helloworld-s2377xozpq-uc.a.run.app/go-back"
+                        "function": "https://filewatch-s2377xozpq-uc.a.run.app/go-back"
                     }
                 },
                 "text": "back"
@@ -124,7 +124,7 @@ def list_card(file_flag, page_token):
                 "disabled": False if next_page_token != -1 else True,
                 "onClick": {
                     "action": {
-                        "function": "https://helloworld-s2377xozpq-uc.a.run.app/more-items",
+                        "function": "https://filewatch-s2377xozpq-uc.a.run.app/more-items",
                         "parameters": [
                             {
                                 "key": "nextPageToken",
@@ -188,7 +188,7 @@ def item_tracking_card(selected_files, previous_email_inputs=None):
             },
             "onClick": {
                 "action": {
-                    "function": "https://helloworld-s2377xozpq-uc.a.run.app/track-item",
+                    "function": "https://filewatch-s2377xozpq-uc.a.run.app/track-item",
                     "parameters": [
                         {
                             "key": "selectedFiles",
@@ -208,7 +208,7 @@ def item_tracking_card(selected_files, previous_email_inputs=None):
             },
             "onClick": {
                 "action": {
-                    "function": "https://helloworld-s2377xozpq-uc.a.run.app/end-tracking",
+                    "function": "https://filewatch-s2377xozpq-uc.a.run.app/end-tracking",
                     "parameters": [
                         {
                             "key": "selectedFiles",
@@ -276,7 +276,7 @@ def item_tracking_card(selected_files, previous_email_inputs=None):
                 },
                 "onClick": {
                     "action": {
-                        "function": "https://helloworld-s2377xozpq-uc.a.run.app/add-email",
+                        "function": "https://filewatch-s2377xozpq-uc.a.run.app/add-email",
                         "parameters": [
                             {
                                 "key": "previousEmailInputs",
@@ -334,7 +334,7 @@ def stop_tracking_card(tracked_files_info):
             },
             "onClick": {
                 "action": {
-                    "function": "https://helloworld-s2377xozpq-uc.a.run.app/end-tracking",
+                    "function": "https://filewatch-s2377xozpq-uc.a.run.app/end-tracking",
                 }
             }
         }

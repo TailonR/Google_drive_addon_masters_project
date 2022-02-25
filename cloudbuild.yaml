@@ -22,6 +22,6 @@ steps:
 images:
  - 'gcr.io/$_PROJECT_ID/$_SERVICE_NAME'
 substitutions:
-   _SERVICE_NAME: helloworld
+   _SERVICE_NAME: filewatch
    _REGION: us-central1
    _PROJECT_ID: driveaddon-2122

@@ -1,22 +1,20 @@
 {
   "oauthScopes": ["https://www.googleapis.com/auth/drive.addons.metadata.readonly",
-    "https://www.googleapis.com/auth/drive.readonly",
-    "https://www.googleapis.com/auth/gmail.addons.current.action.compose",
-    "https://www.googleapis.com/auth/drive.readonly",
-    "https://www.googleapis.com/auth/drive.metadata"
-  ],
+    "https://www.googleapis.com/auth/gmail.compose",
+          "https://www.googleapis.com/auth/datastore", "https://www.googleapis.com/auth/drive"],
+
   "addOns": {
     "common": {
-      "name": "My HTTP Add-on",
-      "logoUrl": "https://cdn2.iconfinder.com/data/icons/hand-conversation-solid-style/91/Hand_38-512.png",
+      "name": "File Watch",
+      "logoUrl": "https://filewatch-s2377xozpq-uc.a.run.app/addon-icon",
       "homepageTrigger": {
-        "runFunction": "https://helloworld-s2377xozpq-uc.a.run.app/"
+        "runFunction": "https://filewatch-s2377xozpq-uc.a.run.app"
       }
     },
     "gmail": {},
     "drive": {
       "onItemsSelectedTrigger": {
-        "runFunction": "https://helloworld-s2377xozpq-uc.a.run.app/item-selected"
+        "runFunction": "https://filewatch-s2377xozpq-uc.a.run.app/item-selected"
       }
     },
     "calendar": {},
