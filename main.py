@@ -19,7 +19,6 @@ app = Flask(__name__)
 # Returns:
 #   The json representation of the homepage card.
 @app.route("/", methods=['POST'])
-# Creates a card with two widgets.
 def load_homepage():
     return cards.homepage_card()
 
@@ -27,6 +26,9 @@ def load_homepage():
 # Push the card to the card stack.
 # The function gets the request used when calling the path and uses that information
 # to find a new list of results and use those in the card.
+#
+# Returns:
+#   The json representation of the list card with the next page of items
 @app.route("/more-items", methods=['POST'])
 def get_more_items():
     req_json = request.get_json(silent=True)
@@ -42,6 +44,7 @@ def get_more_items():
 
 
 # Returns the instructions to pop the card created after clicking the "more items" button.
+#
 # Returns:
 #   The json representation of the instructions to pop the top card in the stack.
 @app.route("/go-back", methods=['POST'])
@@ -62,6 +65,7 @@ def go_back():
 # Push the item tracking card to the card stack.
 # The function gets the request used to call the path and creates the
 # item tracking card based on the files selected.
+#
 # Returns:
 #   The json representation of the item tracking card.
 @app.route("/item-selected", methods=['POST'])
@@ -75,31 +79,47 @@ def item_selected():
 # Gets the most recent changes and sends messages to the correct emails.
 #
 # Returns:
-#   The notification card.
+#   The json representation of a notification card.
 @app.route("/trigger", methods=['POST'])
 def trigger():
+    # If the notification is the one stating notifications are starting
+    # don't send a message
+    if request.headers["X-Goog-Resource-State"] == "sync":
+        return cards.notification_card("")
     changes = Methods.get_recent_changes()
-    file_ids = [file["fileId"] for file in changes["changes"]]
+    file_ids_and_names = [(file["fileId"], file["file"]["name"]) for file in changes["changes"]]
     # Send messages to the correct emails, if any.
-    for file_id in file_ids:
+    for file_id_and_name in file_ids_and_names:
         # Send messages for the check-marked files.
-        if datastoreMethods.get_tracked_file_info(file_id) is not None:
-            auxMethods.send_message(changes["changes"])
+        response = Methods.get_file_fields(file_id_and_name[0], "trashed, createdTime, parents")
+        if response["trashed"]:
+            text = f"Hello, \nIf you are seeing this, then {file_id_and_name[1]} has been trashed"
+            subject = f"{file_id_and_name[1]} has been trashed"
+
+        elif auxMethods.is_added(response["createdTime"]):
+            text = f"Hello, \nIf you are seeing this, then {file_id_and_name[1]} has been added"
+            subject = f"{file_id_and_name[1]} has been added"
+        else:
+            text = f"Hello, \nIf you are seeing this, then {file_id_and_name[1]} has been edited"
+            subject = f"{file_id_and_name[1]} has been edited"
+
+        if datastoreMethods.get_tracked_file_info(file_id_and_name[0]) is not None:
+            auxMethods.deliver_message(file_id_and_name, subject, text)
         else:
             # Send messages for the check-marked folders.
-            response = Methods.get_file_fields(file_id, "parents")
+            response = Methods.get_file_fields(file_id_and_name[0], "parents")
             for parent_id in response["parents"]:
                 if datastoreMethods.get_tracked_file_info(parent_id) is not None:
-                    auxMethods.send_message(changes["changes"], parent_id)
+                    auxMethods.deliver_message(file_id_and_name, subject, text, parent_id)
     return cards.notification_card("")
 
 
-# Store the emails given for the check-marked files and create a channel.
-# This functions uses the request used when calling the function to get the
-# provided emails and the check-marked files or folders.
+# Store the emails given for the check-marked files and creates a channel.
+# The request used when calling the function contains the emails and the check-marked files or folders
+# to be stored in the datastore.
 #
 # Returns:
-#   A notification card containing the message that the selected files are tracked.
+#   The json representation of a notification card.
 @app.route("/track-item", methods=['POST'])
 def track_item():
     req_json = request.get_json(silent=True)
@@ -109,7 +129,7 @@ def track_item():
         return cards.notification_card("No emails were provided")
     else:
         form_inputs = req_json["commonEventObject"]["formInputs"]
-        emails = auxMethods.get_emails(form_inputs)
+        emails = auxMethods.get_emails_from_form_input(form_inputs)
 
     # Create a channel for change notifications
     try:
@@ -146,7 +166,7 @@ def track_item():
 # Add a text input widget so the user can add another email
 #
 # Returns:
-#   The json representation of a card containing an extra email input field.
+#   The json representation of the item tracking card with an extra email input field.
 @app.route("/add-email", methods=['POST'])
 def add_email():
     req_json = request.get_json(silent=True)
@@ -182,13 +202,18 @@ def stop_tracking():
 
 
 # Deletes tracking information for the selected files
+# and if there are no more entries in the table, stop the channel
+#
+# Returns:
+#   The json representation of a notification card
 @app.route("/end-tracking", methods=['POST'])
 def end_tracking():
     req_json = request.get_json(silent=True)
     selected_file_ids: []
-    if "formInputs" in req_json:
+    # If end tracking was called from the stop tracking card
+    if "formInputs" in req_json["commonEventObject"] and "Selection Input" in req_json["commonEventObject"]["formInputs"]:
         selected_file_ids = auxMethods.get_string_input_values(req_json)
-    else:
+    else:  # If end tracking was called from a context
         selected_files = json.loads(req_json["commonEventObject"]["parameters"]["selectedFiles"])
         selected_file_ids = [file["id"] for file in selected_files]
 
@@ -201,7 +226,7 @@ def end_tracking():
     if len(file_entities) > 0:
         return cards.notification_card("The selected files are no longer being tracked")
     else:
-        return cards.notification_card("The selected Files are not being tracked")
+        return cards.notification_card("The selected files are not being tracked")
 
 
 if __name__ == "__main__":

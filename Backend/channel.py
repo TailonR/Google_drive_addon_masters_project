@@ -1,5 +1,3 @@
-import json
-from google.cloud import logging
 from googleapiclient import errors
 import uuid
 from Backend.apiMethods import create_service

@@ -1,6 +1,8 @@
 import json
 import Backend.datastoreMethods as datastoreMethods
 import Backend.apiMethods as Methods
+from datetime import datetime
+import pytz
 
 
 # Get the input values of the request.
@@ -17,7 +19,8 @@ def get_string_input_values(form_submit_response):
 
 # Add text widgets to the given card.
 # The text widgets will contain the names
-# of the selected items.
+# of the selected items and will be displayed
+# on the item tracking card.
 #
 # Args:
 #   selected_items: the selected items.
@@ -35,18 +38,6 @@ def add_text_widgets(selected_items, card):
             }
 
         card.add_widget("textParagraph", widget_item)
-
-
-# Get the file_ids that are being tracked.
-# Helps with the list card
-def get_all_file_ids_tracked():
-    files_info = datastoreMethods.get_tracked_file_info()
-    if files_info is None:
-        return None
-    file_ids_for_emails = []
-    for info in files_info:
-        file_ids_for_emails.append(info.key.id_or_name)
-    return file_ids_for_emails
 
 
 # Create list items for the list card.
@@ -96,11 +87,11 @@ def create_list_items_for_stop_tracking_card(tracked_file_info):
 #
 # Returns:
 #   A list of the emails in the form input
-def get_emails(form_inputs):
+def get_emails_from_form_input(form_inputs):
     emails = []
     for key, value in form_inputs.items():
         if isinstance(value, dict):
-            emails.extend(get_emails(value))
+            emails.extend(get_emails_from_form_input(value))
         else:
             emails.append(value[0])
     return emails
@@ -123,27 +114,42 @@ def get_file_property(file_json, attribute):
     return file_attributes
 
 
-# Send a message for each file to every email associated with it.
+# Deliver a message for each file to every email associated with it.
 #
 # Args:
 #   files: The files to send an email about their changes.
 #   parent_id: The id of a folder. Given if a file change occurs
 #   on a file that is inside a folder being tracked. (optional).
-def send_message(files, parent_id=""):
+def deliver_message(id_and_name, subject, message_text, parent_id=""):
     gmail_service, _ = Methods.create_service('gmail', 'v1')
     user_info = gmail_service.users().getProfile(userId='me').execute()
     source = user_info["emailAddress"]
-    for file in files:
-        file_id = file["fileId"]
-        emails: []
-        if parent_id == "":
-            emails = datastoreMethods.get_tracked_file_info(file_id, "emails")
-        else:
-            emails = datastoreMethods.get_tracked_file_info(parent_id, "emails")
+    file_id = id_and_name[0]
+    emails: []
+    if parent_id == "":
+        emails = datastoreMethods.get_tracked_file_info(file_id, "emails")
+    else:
+        emails = datastoreMethods.get_tracked_file_info(parent_id, "emails")
 
-        subject = f"{file['file']['name']} has been updated"
-        for email in emails:
-            name = email[0:5]
-            text = f"Hello {name}, \nIf you are seeing this, then a file had been edited"
-            email_bytes = Methods.create_message(source, email, subject, text)
-            Methods.send_message("me", email_bytes)
+    for email in emails:
+        email_bytes = Methods.create_message(source, email, subject, message_text)
+        Methods.send_message("me", email_bytes)
+
+
+# Determine if the file was created or uploaded recently.
+#
+# In order for this to work, the UTC time must be converted
+# to the local time of the user.
+#
+# Args:
+#   creation_date_string: the date of creation in a string format. In UTC time.
+#
+# Returns:
+#   true if the time since the file was created is less than 30 seconds
+#   false if otherwise.
+def is_added(creation_date_string):
+    time_format = "%Y-%m-%dT%H:%M:%S.%fz"
+    created_time = datetime.strptime(creation_date_string, time_format)
+    local_time = pytz.utc.localize(created_time, is_dst=None).astimezone()
+    time_since_creation = datetime.now().astimezone() - local_time
+    return time_since_creation.total_seconds() < 30

@@ -1,7 +1,7 @@
 import json
-import time
 from google.cloud import datastore
 from datetime import datetime
+
 
 # Store a new token.
 #
@@ -29,7 +29,7 @@ def store_token(client: datastore.Client, creds):
 
 
 # Get the most recently created token.
-#
+# Used for authorization
 # Args:
 #   client: a client used for interacting with
 #   the datastore.
@@ -47,6 +47,8 @@ def get_most_recent_token(client: datastore.Client):
 
 
 # Determines if any token exists.
+# Used when the addon is opened to determine
+# if the addon needs to create a new token
 #
 # Returns:
 #   True if there exists a token, False otherwise.
@@ -64,9 +66,9 @@ def token_exists():
 # Store the file information of file to be tracked.
 #
 # Args:
-#   file_ids: the ids that will be stored in the datastore.
-#   emails: the emails associated with the file_ids.
-#   parent_id: the parent of the file.
+#   file_id: the id of the file to be tracked.
+#   file_name: the name associated with the file_id.
+#   emails: the emails associated with the file_id.
 def store_file_info(file_id, file_name, emails):
     datastore_client = datastore.Client()
     complete_key = datastore_client.key("TrackedFiles", file_id)
@@ -79,7 +81,9 @@ def store_file_info(file_id, file_name, emails):
 
 
 # Get the file information associated with the given file_id.
-# Such information includes the parent_id and the email addresses to
+# Such information includes the file name and the email addresses to
+# send messages to.
+#
 # Args:
 #   file_id: the id to look for in the datastore.
 #   attribute: the attribute to return.
@@ -87,8 +91,8 @@ def store_file_info(file_id, file_name, emails):
 # Returns:
 #   The table entities associated with given the file_id in their key
 #   or none if it doesn't exist.
-#   If no file_id is provided, all entries in the table
-#   If no attribute, all entity attributes
+#   If no file_id is provided, all entries in the table.
+#   If no attribute, all entity attributes.
 def get_tracked_file_info(file_id=None, attribute=None):
     datastore_client = datastore.Client()
     if file_id is not None and attribute is not None:  # Return the given attribute of the given file_id
@@ -139,6 +143,9 @@ def get_channel_info():
 
 
 # Delete a datastore entity.
+# Entities are defined by their keys, which are composed
+# of the kind of entity and the file_id (refer to
+# store_file_info or store_channel_info).
 #
 # Args:
 #   kind: the kind of the entity to be deleted.
@@ -159,5 +166,48 @@ def delete_datastore_entities(kind, file_ids):
     keys = []
     for file_id in file_ids:
         keys.append(datastore_client.key(kind, file_id))
-
     datastore_client.delete_multi(keys)
+
+
+# Get the file_ids that are being tracked.
+# Helps with the list card.
+#
+# Returns:
+#   A list of the tracked file ids.
+def get_all_file_ids_tracked():
+    datastore_client = datastore.Client()
+    query = datastore_client.query(kind="TrackedFiles")
+    query.keys_only()
+    query_result_list = list(query.fetch())
+    key_list = [key_pair.key.id_or_name for key_pair in query_result_list]
+    return key_list
+
+
+def store_start_page_tokens(page_token):
+    # Delete all previously stored tokens
+    datastore_client = datastore.Client()
+    query = datastore_client.query(kind="StartPageTokens")
+    query.keys_only()
+    query_result_list = list(query.fetch())
+    if len(query_result_list) > 0:
+        datastore_client.delete_multi(query_result_list)
+    # Add the current page token
+    email_entity = datastore.Entity(datastore_client.key("StartPageTokens"))
+    email_entity.update({
+        "created": datetime.now(),
+        "previousPageToken": page_token
+    })
+    datastore_client.put(email_entity)
+
+
+# Get the previous page token from the datastore
+#
+# Returns:
+#   The page token stored in the datastore as a string
+def get_start_page_token():
+    datastore_client = datastore.Client()
+    query = datastore_client.query(kind="StartPageTokens")
+    query.order = ["created"]
+    query_result_list = list(query.fetch())
+    if len(query_result_list) > 0:
+        return query_result_list[0]
