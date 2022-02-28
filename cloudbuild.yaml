@@ -19,6 +19,7 @@ steps:
    - '$_REGION'
    - '--platform'
    - 'managed'
+   - '--allow-unauthenticated'
 images:
  - 'gcr.io/$_PROJECT_ID/$_SERVICE_NAME'
 substitutions:

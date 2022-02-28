@@ -366,3 +366,15 @@ I found these two articles to help with the linking issue:
 
 Found this article to create a bunch of list items from a string to json: https://www.tutorialspoint.com/How-to-convert-string-to-JSON-using-Python
 I found this article to help me with knowing all the card attributes: https://developers.google.com/workspace/add-ons/reference/rpc/google.apps.card.v1#google.apps.card.v1.Card
+
+### February 27, 2022
+I am going back and collecting the articles that I've used to help me containerize the app:
+* https://codelabs.developers.google.com/codelabs/workspace-add-on-nodejs-cloudrun#3 (to introduce me to the use of 
+  Cloud Run with Google Workspace addons)
+* https://www.jhanley.com/google-cloud-run-getting-started-with-python-and-flask/ (to help me translate the Node.js code
+  into Python)
+* https://stackoverflow.com/questions/51395936/how-to-get-flask-app-running-with-gunicorn (to help me change the code from being in a 
+  development environment to use in a production environment)
+* https://codelabs.developers.google.com/codelabs/cloud-run-hello-python3/#3 (to help me change the code from being in a 
+  development environment to use in a production environment)
+* 

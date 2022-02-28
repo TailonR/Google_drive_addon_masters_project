@@ -1,6 +1,5 @@
 # To ensure that temporary or user specific files are not added
 # Need to ignore the credentials file before pushing
-token.json
 service-account-file.json
 response.json
 .idea

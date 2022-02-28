@@ -6,4 +6,3 @@ README.md
 __pycache__
 .pytest_cache
 service-account-file.json
-token.json

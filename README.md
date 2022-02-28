@@ -11,7 +11,7 @@ such events.
 * Python 3.9
 * Google Cloud SDK
 * Google Cloud Run
-* Google Python API
+* Google API Python Client
 
 ### Installing Google Cloud SDK
 I followed [this article](https://medium.com/swlh/installing-google-cloud-sdk-to-use-python-from-anaconda-94890014e4e8)

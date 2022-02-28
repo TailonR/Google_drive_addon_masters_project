@@ -46,23 +46,6 @@ def get_most_recent_token(client: datastore.Client):
         return None
 
 
-# Determines if any token exists.
-# Used when the addon is opened to determine
-# if the addon needs to create a new token
-#
-# Returns:
-#   True if there exists a token, False otherwise.
-def token_exists():
-    datastore_client = datastore.Client()
-    query = datastore_client.query(kind="Tokens")
-    query.order = ["created"]
-    results = list(query.fetch())
-    if len(results) > 0:
-        return True
-    else:
-        return False
-
-
 # Store the file information of file to be tracked.
 #
 # Args:

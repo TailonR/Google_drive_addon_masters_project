@@ -175,7 +175,6 @@ def list_card(file_flag, page_token):
 #   The Card object containing the json representation of the
 #   item tracking card.
 def item_tracking_card(selected_files, previous_email_inputs=None):
-    card = Card("Notifications")
     # This fixed_footer contains the buttons that allows users to submit the provided emails to be associated
     # with the selected files and that allows users to end tracking of the selected files.
     fixed_footer = {
@@ -228,6 +227,7 @@ def item_tracking_card(selected_files, previous_email_inputs=None):
     }
 
     # Create the card
+    card = Card("Item Tracking")
     card.update_action()
     card.create_card("Files selected", fixed_footer)
     card.add_section("Enter emails to be notified", False)

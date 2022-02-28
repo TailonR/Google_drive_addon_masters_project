@@ -1,5 +1,4 @@
 import json
-import os
 import cards
 import time
 from card import Card
@@ -9,10 +8,24 @@ from Backend import channel
 import auxillaryMethods as auxMethods
 from googleapiclient import errors
 import Backend.datastoreMethods as datastoreMethods
-import Backend.authorization as authorization
 
 
-app = Flask(__name__)
+# Create a Flask object
+# Also checks to see if there is an expired channel
+#
+# Returns:
+#   The flask app object to be called in the Procfile
+def create_app():
+    new_app = Flask(__name__)
+    curr_time_ms = round(time.time() * 1000)
+    channel_info = datastoreMethods.get_channel_info()
+    if channel_info is not None and int(channel_info["expiration"]) < curr_time_ms:
+        channel.create_channel()
+    return new_app
+
+
+# The flask app object
+app = create_app()
 
 
 # Push the homepage to the card stack.
@@ -21,7 +34,6 @@ app = Flask(__name__)
 #   The json representation of the homepage card.
 @app.route("/", methods=['POST'])
 def load_homepage():
-    print("Load homepage")
     return cards.homepage_card()
 
 
@@ -33,7 +45,6 @@ def load_homepage():
 #   The json representation of the list card with the next page of items
 @app.route("/more-items", methods=['POST'])
 def get_more_items():
-    print("Get more items")
     req_json = request.get_json(silent=True)
     next_page_token = req_json["commonEventObject"]["parameters"]["nextPageToken"]
     called_by = req_json["commonEventObject"]["parameters"]["from"]  # could have another parameter, that is the index
@@ -52,7 +63,6 @@ def get_more_items():
 #   The json representation of the instructions to pop the top card in the stack.
 @app.route("/go-back", methods=['POST'])
 def go_back():
-    print("Go Back")
     return {
         "renderActions": {
             "action": {
@@ -74,7 +84,6 @@ def go_back():
 #   The json representation of the item tracking card.
 @app.route("/item-selected", methods=['POST'])
 def item_selected():
-    print("Item Selected")
     req_json = request.get_json(silent=True)
     selected_items = req_json["drive"]["selectedItems"]
     card = cards.item_tracking_card(selected_items)
@@ -87,7 +96,6 @@ def item_selected():
 #   The json representation of a notification card.
 @app.route("/trigger", methods=['POST'])
 def trigger():
-    print("Trigger")
     # If the notification is the one stating notifications are starting
     # don't send a message
     if request.headers["X-Goog-Resource-State"] == "sync":
@@ -128,7 +136,6 @@ def trigger():
 #   The json representation of a notification card.
 @app.route("/track-item", methods=['POST'])
 def track_item():
-    print("Track Item")
     req_json = request.get_json(silent=True)
     emails: []
     # Determine if emails were provided.
@@ -142,8 +149,8 @@ def track_item():
     try:
         # Only create a channel if none exists already
         channel_entity = datastoreMethods.get_channel_info()
-        curr_time_ms = round(time.time() * 1000)
-        if channel_entity is None or int(channel_entity["expiration"]) < curr_time_ms:
+        curr_time = round(time.time() * 1000)  # in milliseconds
+        if channel_entity is None or int(channel_entity["expiration"]) < curr_time:
             channel.create_channel()
     except errors.HttpError as error:
         message = f"An error occurred: {error}"
@@ -176,7 +183,6 @@ def track_item():
 #   The json representation of the item tracking card with an extra email input field.
 @app.route("/add-email", methods=['POST'])
 def add_email():
-    print("Add email")
     req_json = request.get_json(silent=True)
     previous_email_inputs = json.loads(req_json["commonEventObject"]["parameters"]["previousEmailInputs"])
     selected_files = json.loads(req_json["commonEventObject"]["parameters"]["selectedFiles"])
@@ -190,7 +196,6 @@ def add_email():
 #   The json representation of the file tracking card.
 @app.route("/file-tracking", methods=['POST'])
 def item_tracking():
-    print("File tracking")
     req_json = request.get_json(silent=True)
     selected_files = auxMethods.get_string_input_values(req_json)
     for index in range(0, len(selected_files)):
@@ -205,7 +210,6 @@ def item_tracking():
 #   The json representation of the stop tracking card.
 @app.route("/stop-tracking", methods=['POST'])
 def stop_tracking():
-    print("Stop Tracking")
     tracked_files_info = datastoreMethods.get_tracked_file_info()
     card = cards.stop_tracking_card(tracked_files_info)
     return card.push_card()
@@ -218,7 +222,6 @@ def stop_tracking():
 #   The json representation of a notification card
 @app.route("/end-tracking", methods=['POST'])
 def end_tracking():
-    print("End tracking")
     req_json = request.get_json(silent=True)
     selected_file_ids: []
     # If end tracking was called from the stop tracking card
@@ -240,13 +243,7 @@ def end_tracking():
         return cards.notification_card("The selected files are not being tracked")
 
 
+# Return the addon's icon
 @app.route("/addon-icon", methods=['GET'])
 def icon():
     return send_from_directory('icon', "fileWatchIcon.png")
-
-
-if __name__ == "__main__":
-    print("Start up")
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
-    if not datastoreMethods.token_exists():
-        authorization.authenticate()

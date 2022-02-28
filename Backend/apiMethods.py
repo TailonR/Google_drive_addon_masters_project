@@ -5,6 +5,7 @@ from googleapiclient.discovery import build
 from Backend import authorization
 from Backend import datastoreMethods
 
+
 # Create a Python representation the given api.
 #
 # Args:
@@ -37,7 +38,7 @@ def create_message(source, to, subject, message_text):
     message['subject'] = subject
     b64_bytes = base64.urlsafe_b64encode(message.as_bytes())
     b64_string = b64_bytes.decode()
-    return {'raw': b64_string}
+    return {'labelIds': "Label_3", 'raw': b64_string}
 
 
 #   Send an email message.
