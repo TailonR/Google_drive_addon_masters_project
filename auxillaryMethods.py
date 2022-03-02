@@ -153,3 +153,24 @@ def is_added(creation_date_string):
     local_time = pytz.utc.localize(created_time, is_dst=None).astimezone()
     time_since_creation = datetime.now().astimezone() - local_time
     return time_since_creation.total_seconds() < 30
+
+
+# Determine if an ancestor of the file is being tracked (this includes parents).
+#
+# Args:
+#   file_id: The id of the file whose parents will be checked to see if they
+#   are tracked.
+#
+# Returns:
+#   The file_id of the tracked ancestor, if one exists.
+#   If no ancestor is tracked, None.
+def check_ancestors(file_id):
+    response = Methods.get_file_fields(file_id, "parents")
+    if "parents" not in response:
+        return None
+    for parent_id in response["parents"]:
+        if datastoreMethods.get_tracked_file_info(parent_id) is not None:
+            return parent_id
+        else:
+            return check_ancestors(parent_id)
+    return None

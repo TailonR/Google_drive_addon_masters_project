@@ -109,7 +109,7 @@ def trigger():
         if response["trashed"]:
             text = f"Hello, \nIf you are seeing this, then {file_id_and_name[1]} has been trashed"
             subject = f"{file_id_and_name[1]} has been trashed"
-
+            datastoreMethods.delete_datastore_entity("TrackedFiles", file_id_and_name[0])
         elif auxMethods.is_added(response["createdTime"]):
             text = f"Hello, \nIf you are seeing this, then {file_id_and_name[1]} has been added"
             subject = f"{file_id_and_name[1]} has been added"
@@ -121,10 +121,9 @@ def trigger():
             auxMethods.deliver_message(file_id_and_name, subject, text)
         else:
             # Send messages for the check-marked folders.
-            response = Methods.get_file_fields(file_id_and_name[0], "parents")
-            for parent_id in response["parents"]:
-                if datastoreMethods.get_tracked_file_info(parent_id) is not None:
-                    auxMethods.deliver_message(file_id_and_name, subject, text, parent_id)
+            tracked_ancestor_id = auxMethods.check_ancestors(file_id_and_name[0])
+            if tracked_ancestor_id is not None:
+                auxMethods.deliver_message(file_id_and_name, subject, text, tracked_ancestor_id)
     return cards.notification_card("")
 
 
